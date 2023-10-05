@@ -2,9 +2,16 @@ import fs from 'fs';
 import path from 'path';
 import tmp from 'tmp';
 
-// Create a temporary directory using the tmp library
+// Create a temporary directory
 const reactAppDirObj = tmp.dirSync({ unsafeCleanup: true });
 export const reactAppDir: string = reactAppDirObj.name;
+// Create the public and src directories
+const publicDir = path.join(reactAppDir, 'public');
+const srcDir = path.join(reactAppDir, 'src');
+
+fs.mkdirSync(publicDir);
+fs.mkdirSync(srcDir);
+
 
 const indexHtmlContent: string = `<!DOCTYPE html>
 <html lang="en">
@@ -84,14 +91,29 @@ const packageJson: string = `{
   }`
 
 // Write the contents to files
-fs.writeFileSync(path.join(reactAppDir, 'index.html'), indexHtmlContent);
-fs.writeFileSync(path.join(reactAppDir, 'App.js'), appJsContent);
-fs.writeFileSync(path.join(reactAppDir, 'index.js'), indexJsContent);
-fs.writeFileSync(path.join(reactAppDir, 'tailwind-config.js'), tailwindConfigJsContent);
+fs.writeFileSync(path.join(publicDir, 'index.html'), indexHtmlContent);
+fs.writeFileSync(path.join(srcDir, 'App.js'), appJsContent);
+fs.writeFileSync(path.join(srcDir, 'index.js'), indexJsContent);
+fs.writeFileSync(path.join(srcDir, 'tailwind-config.js'), tailwindConfigJsContent);
 fs.writeFileSync(path.join(reactAppDir, 'package.json'), packageJson);
 
 
+// Recursive function to print of file structure.
+function listDirectoryStructure(dir: string, prefix = ''): void {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
 
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      console.log(prefix + 'DIR: ' + fullPath);
+      listDirectoryStructure(fullPath, prefix + '  ');
+    } else {
+      console.log(prefix + 'FILE: ' + fullPath);
+    }
+  }
+}
+// Call the function for the main temp directory
+// listDirectoryStructure(reactAppDir);
 
 // // List of files to check
 // const files = ['index.html', 'App.js', 'index.js', 'tailwind-config.js', 'package.json'];
