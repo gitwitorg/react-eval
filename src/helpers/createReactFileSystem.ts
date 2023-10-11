@@ -3,7 +3,7 @@ import path from 'path';
 import tmp from 'tmp';
 
 // Create a temporary directory
-const reactAppDirObj = tmp.dirSync({ unsafeCleanup: true });
+export const reactAppDirObj = tmp.dirSync({ unsafeCleanup: true });
 export const reactAppDir: string = reactAppDirObj.name;
 // Create the public and src directories
 const publicDir = path.join(reactAppDir, 'public');
@@ -96,6 +96,16 @@ fs.writeFileSync(path.join(srcDir, 'App.js'), appJsContent);
 fs.writeFileSync(path.join(srcDir, 'index.js'), indexJsContent);
 fs.writeFileSync(path.join(srcDir, 'tailwind-config.js'), tailwindConfigJsContent);
 fs.writeFileSync(path.join(reactAppDir, 'package.json'), packageJson);
+
+
+interface TmpDirObject {
+  name: string;
+  removeCallback: () => void;
+}
+
+export function deleteTemporaryDirectory(tmpDirObject: TmpDirObject): void {
+  tmpDirObject.removeCallback();
+}
 
 
 // Recursive function to print of file structure.

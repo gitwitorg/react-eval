@@ -1,8 +1,7 @@
-import { reactAppDir } from './helpers/createReactFileSystem';
-import { installAndBuild, runReactAppInDev } from './helpers/buildReactApp';
-// import express, { Express } from 'express';
+// TODO use deleteTemporaryDirectory with reactAppDirObj as input to clear up the temp memory after each captured react app process.
+import { reactAppDir, reactAppDirObj, deleteTemporaryDirectory } from './helpers/createReactFileSystem';
+import { installAndBuild, runReactAppInDev, clearPortForReactAppLaunch } from './helpers/buildReactApp';
 import puppeteer, { Browser, Page } from 'puppeteer';
-import { setTimeout as delay } from 'timers/promises';
 
 
 async function captureReactAppOutput() {
@@ -26,24 +25,32 @@ async function captureReactAppOutput() {
 }
 
 (async () => {
+    // Perform child_process in-sync opperations.
     try {
+        clearPortForReactAppLaunch(3000);
         installAndBuild(reactAppDir);
     } catch (error: any) {
-        console.error(`ERROR: when trying to install react app dependencies: ${error}`);
+        console.error(error);
         process.exit(1);
     }
 
+    // Run async child_process with react dev server.
+    const { childProcess, started } = runReactAppInDev(reactAppDir);
     try {
-        await runReactAppInDev(reactAppDir);
-        console.log("I've already awaited for the child process that runs the react app to start");
+        await started;
+        console.log("Child Process successfully started React App in Dev.");
     } catch (error: any) {
         console.error(`ERROR: when trying to run the React app: ${error}`);
         process.exit(1);
     }
 
-    console.log("back in the main thread. Should call the captureReactAppOutput...");
+    console.log("Back in the main thread. Should call captureReactAppOutput to start headless browser...");
     await captureReactAppOutput();
 
+    childProcess.kill();
+    console.log("Child process has been killed. Main process should exit in 5 seconds...")
+
     // Force nodejs process to terminate which will also terminate the dev react server on the child_process.
+    await new Promise(r => setTimeout(r, 5000));
     process.exit(0);
 })();

@@ -1,4 +1,14 @@
-import { execSync, spawn } from 'child_process';
+import { execSync, spawn, ChildProcess } from 'child_process';
+
+
+export function clearPortForReactAppLaunch(port: number): void {
+    try {
+        execSync(`kill -9 $(lsof -t -i:${port})`);
+        console.log(`Successfully killed process on port ${port}`);
+    } catch (error: any) {
+        throw new Error(`Unable to clear port ${port}. ERROR: ${error}`)
+    }
+}
 
 export function installAndBuild(reactAppPath: string): void {
     try {
@@ -12,35 +22,30 @@ export function installAndBuild(reactAppPath: string): void {
     }
 }
 
-export function runReactAppInDev(reactAppPath: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-        try {
-            const child = spawn('npm', ['run', 'start'], {
-                cwd: reactAppPath
-            });
-
-            child.stdout.on('data', (data) => {
-                console.log(`stdout of the child process that runs the react app in dev: ${data}`);
-                // Check for a specific log message that indicates the React app has started.
-                // This hack allows us to only resolve the promise once the child process properly started up the react dev server.
-                if (data.includes('localhost:3000')) {
-                    resolve();
-                }
-            });
-
-            child.stderr.on('data', (data) => {
-                console.error(`stderr of the child process that runs the react app in dev: ${data}`);
-            });
-
-            child.on('close', (code) => {
-                console.log(`child process that runs the react app in dev exited with code ${code}`);
-            });
-        } catch (error: any) {
-            reject(new Error(`Unable to run the app: ${error}`));
-        }
+export function runReactAppInDev(reactAppPath: string): { childProcess: ChildProcess, started: Promise<void> } {
+    const child = spawn('npm', ['run', 'start'], {
+        cwd: reactAppPath
     });
-}
 
+    const started = new Promise<void>((resolve, reject) => {
+        child.stdout.on('data', (data) => {
+            console.log(`STDOUT child_process: ${data}`);
+            if (data.includes('localhost:3000')) {
+                resolve();
+            }
+        });
+
+        child.stderr.on('data', (data) => {
+            console.error(`STDERR child_process: ${data}`);
+        });
+
+        child.on('close', (code) => {
+            console.log(`EXIT code child_process: ${code}`);
+        });
+    });
+
+    return { childProcess: child, started };
+}
 
 
 
