@@ -4,6 +4,7 @@ import { execSync, spawn, ChildProcess } from 'child_process';
 export function clearPortForReactAppLaunch(port: number): void {
     try {
         execSync(`kill -9 $(lsof -t -i:${port})`);
+
         console.log(`Successfully killed process on port ${port}`);
     } catch (error: any) {
         throw new Error(`Unable to clear port ${port}. ERROR: ${error}`)
@@ -12,7 +13,7 @@ export function clearPortForReactAppLaunch(port: number): void {
 
 export function installAndBuild(reactAppPath: string): void {
     try {
-        console.log('Starting installation of react dependencies...');
+        console.log('Installing react dependencies...');
 
         execSync(`cd ${reactAppPath} && npm install`, { stdio: 'inherit' });
 
