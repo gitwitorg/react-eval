@@ -12,7 +12,13 @@ const srcDir = path.join(reactAppDir, 'src');
 fs.mkdirSync(publicDir);
 fs.mkdirSync(srcDir);
 
-export function createTemporaryFileSystem(appDotJS: string, packageDotJSON: string, tailwindJSdotConfig: string): void {
+interface TmpDirObject {
+  name: string;
+  removeCallback: () => void;
+}
+
+
+export function createTemporaryFileSystem(appDotJS: string, packageDotJSON: string): void {
   const indexHtmlContent: string = `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -36,6 +42,15 @@ export function createTemporaryFileSystem(appDotJS: string, packageDotJSON: stri
       <App />
     </StrictMode>
   );`;
+  const tailwindJSdotConfig: string = `tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          clifford: '#da373d',
+        }
+      }
+    },
+  }`;
 
   // Write the contents to files
   fs.writeFileSync(path.join(srcDir, 'index.js'), indexJsContent);
@@ -43,12 +58,6 @@ export function createTemporaryFileSystem(appDotJS: string, packageDotJSON: stri
   fs.writeFileSync(path.join(reactAppDir, 'package.json'), packageDotJSON);
   fs.writeFileSync(path.join(publicDir, 'index.html'), indexHtmlContent);
   fs.writeFileSync(path.join(srcDir, 'App.js'), appDotJS);
-}
-
-
-interface TmpDirObject {
-  name: string;
-  removeCallback: () => void;
 }
 
 export function deleteTemporaryDirectory(tmpDirObject: TmpDirObject): void {
