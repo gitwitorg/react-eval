@@ -66,9 +66,34 @@
 // })();
 
 
-// Assuming the JSON is stored in a file named 'data.json' in the same folder
+
+// TODO use a tempalte package.json, then add whatever got imported in the app.json as a global import: whatever_package: "*"
 import fs from 'fs';
 import path from 'path';
+
+const PACKAGE_JSON_TEMPLATE = `
+"dependencies": {
+        "react": "^18.0.0",
+            "react-dom": "^18.0.0",
+                "react-scripts": "^4.0.0"
+},
+"scripts": {
+    "start": "react-scripts --openssl-legacy-provider start"
+},
+"main": "./src/index.js",
+    "browserslist": {
+    "production": [
+        ">0.2%",
+        "not dead",
+        "not op_mini all"
+    ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+}
+}`;
 
 (async () => {
     const fs = require('fs');
@@ -91,9 +116,29 @@ import path from 'path';
         if (match && match[1]) {
             let extractedContent = match[1].trim();
 
-            // Split the content by newline and remove the first line
+            // Split the content by newline and remove the first line as it's not necessary
             const lines = extractedContent.split('\n').slice(1);
             extractedContent = lines.join('\n');
+
+            // Extract imported libraries
+            const importLines = lines.filter(line => line.startsWith('import'));
+            const libraries = importLines.map(line => {
+                const match = line.match(/'([^']+)'/);
+                return match ? match[1] : null;
+            }).filter(lib => lib && !lib.includes('react') && !lib.includes('tailwind'));
+
+            // Modify PACKAGE_JSON_TEMPLATE to include the libraries
+            const dependenciesIndex = PACKAGE_JSON_TEMPLATE.indexOf('"dependencies": {') + 17;
+            const dependenciesToAdd = libraries.map(lib => `"${lib}": "*"`).join(',\n');
+            const modifiedPackageJson = [
+                PACKAGE_JSON_TEMPLATE.slice(0, dependenciesIndex),
+                dependenciesToAdd,
+                libraries.length > 0 ? ',' : '', // Add comma after the last new library
+                PACKAGE_JSON_TEMPLATE.slice(dependenciesIndex)
+            ].join('');
+
+            console.log('Modified PACKAGE_JSON_TEMPLATE:', modifiedPackageJson);
+
 
             console.log('Extracted Content:', extractedContent);
         }
@@ -104,6 +149,7 @@ import path from 'path';
             count++;
         }
     });
+
 
 
 
