@@ -24,7 +24,6 @@ type ErrorData = {
     error: Array<string>;
     appDotJs: string;
     packageDotJson: string;
-    tailwindJSdotConfig: string
 }
 
 export async function saveErrorInfo(errorData: ErrorData): Promise<void> {
@@ -36,7 +35,6 @@ export async function saveErrorInfo(errorData: ErrorData): Promise<void> {
             prompt: errorData.prompt,
             appDotJs: errorData.appDotJs,
             packageDotJson: errorData.packageDotJson,
-            tailwindJSdotConfig: errorData.tailwindJSdotConfig,
         });
     } catch (error: any) {
         throw new Error(`Unable to save react app error info to DB: ${error}`)

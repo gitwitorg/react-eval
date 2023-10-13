@@ -66,8 +66,6 @@
 // })();
 
 
-
-// TODO use a tempalte package.json, then add whatever got imported in the app.json as a global import: whatever_package: "*"
 import fs from 'fs';
 import path from 'path';
 
@@ -106,6 +104,8 @@ const PACKAGE_JSON_TEMPLATE = `
     let count = 0;
 
     jsonData.forEach((entry: any) => {
+        //TODO delete temporary file directory
+
         // LLM response code
         const LLMresponse = entry.responseBody.choices[0].message.content;
 
@@ -139,8 +139,12 @@ const PACKAGE_JSON_TEMPLATE = `
 
             console.log('Modified PACKAGE_JSON_TEMPLATE:', modifiedPackageJson);
 
-
             console.log('Extracted Content:', extractedContent);
+
+            // TODO pass packahe.json and app.js to createReactFileSystem.ts to create a new file system.
+            // RUN all of the child processes to eventually capture all of the errors in the set. 
+            // Pass the errors Set alongside all of the ErrorData to saveErrorInfo.
+            // Test it all together.
         }
 
         if (count === 1) {
