@@ -66,8 +66,48 @@
 // })();
 
 
+// Assuming the JSON is stored in a file named 'data.json' in the same folder
+import fs from 'fs';
+import path from 'path';
+
+(async () => {
+    const fs = require('fs');
+    const path = require('path');
+
+    const filePath = path.join(__dirname, '..', 'helicone_gitwit_react_results.json');
+    const rawData = fs.readFileSync(filePath, 'utf-8');
+    const jsonData = JSON.parse(rawData);
+
+    let count = 0;
+
+    jsonData.forEach((entry: any) => {
+        // LLM response code
+        const LLMresponse = entry.responseBody.choices[0].message.content;
+
+        // Extract the content between the three backticks
+        const regex = /```([\s\S]*?)```/g;
+        const match = regex.exec(LLMresponse);
+
+        if (match && match[1]) {
+            let extractedContent = match[1].trim();
+
+            // Split the content by newline and remove the first line
+            const lines = extractedContent.split('\n').slice(1);
+            extractedContent = lines.join('\n');
+
+            console.log('Extracted Content:', extractedContent);
+        }
+
+        if (count === 1) {
+            process.exit(0);
+        } else {
+            count++;
+        }
+    });
 
 
+
+})();
 
 
 
@@ -82,6 +122,7 @@
 //     error: ["error 1", "error 2"],
 //     appDotJs: "some app.js code",
 //     packageDotJson: "some pacakage.json code",
+//     tailwindJSdotConfig: "some tailwind config"
 // };
 
 // (async () => {
