@@ -11,7 +11,7 @@ export function clearPortForReactAppLaunch(port: number): void {
     }
 }
 
-export function installAndBuild(reactAppPath: string): void {
+export function installReactDependencies(reactAppPath: string): void {
     try {
         console.log('Installing react dependencies...');
 
@@ -23,7 +23,7 @@ export function installAndBuild(reactAppPath: string): void {
     }
 }
 
-export function runReactAppInDev(reactAppPath: string): { childProcess: ChildProcess, started: Promise<void> } {
+export function runReactAppInDev(reactAppPath: string): { childProcess: ChildProcess, started: Promise<void>, exited: Promise<number | null> } {
     const child = spawn('npm', ['run', 'start'], {
         cwd: reactAppPath
     });
@@ -39,13 +39,16 @@ export function runReactAppInDev(reactAppPath: string): { childProcess: ChildPro
         child.stderr.on('data', (data) => {
             console.error(`STDERR child_process: ${data}`);
         });
+    });
 
-        child.on('close', (code) => {
-            console.log(`EXIT code child_process: ${code}`);
+    const exited = new Promise<number | null>((resolve) => {
+        child.on('exit', (code) => {
+            console.log(`Child process exited with code ${code}`);
+            resolve(code);
         });
     });
 
-    return { childProcess: child, started };
+    return { childProcess: child, started, exited };
 }
 
 
