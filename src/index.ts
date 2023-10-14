@@ -1,6 +1,6 @@
 // TODO use deleteTemporaryDirectory with reactAppDirObj as input to clear up the temp memory after each captured react app process.
 import { createTemporaryFileSystem, deleteTemporaryDirectory } from './helpers/createReactFileSystem';
-import { installAndBuild, runReactAppInDev, clearPortForReactAppLaunch } from './helpers/buildReactApp';
+import { installReactDependencies, runReactAppInDev, clearPortForReactAppLaunch } from './helpers/buildReactApp';
 import puppeteer, { Browser, Page } from 'puppeteer';
 import { saveErrorInfo } from "./lib/firestore";
 
@@ -106,6 +106,7 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
     const rawData = fs.readFileSync(filePath, 'utf-8');
     const jsonData = JSON.parse(rawData);
 
+    // TODO remove before deploy to production.
     let count = 0;
 
     for (const entry of jsonData) {
@@ -119,7 +120,7 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
         // Perform child_process in-sync opperations.
         try {
             clearPortForReactAppLaunch(3000);
-            installAndBuild(reactAppDir);
+            installReactDependencies(reactAppDir);
         } catch (error: any) {
             deleteTemporaryDirectory(reactAppDirObj);
             console.error(error);
@@ -127,7 +128,7 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
         }
 
         // Run async child_process with react dev server.
-        const { childProcess, started } = runReactAppInDev(reactAppDir);
+        const { childProcess, started, exited } = runReactAppInDev(reactAppDir);
         try {
             await started;
             console.log("Child Process successfully started React App in Dev.");
@@ -155,10 +156,17 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
             }
         }
 
-        if (childProcess.kill()) {
-            console.log("Child process has been killed. Main process should exit in 5 seconds...")
+        if (childProcess.kill('SIGTERM')) {
+            console.log("Signal sent to child process to terminate.");
+            try {
+                await exited;
+                console.log("Child process has been killed. Main process can continue execution...");
+            } catch (error: any) {
+                console.error('Unable to gracefully kill child process...')
+            }
         } else {
-            console.error("Unable to kill child_process.")
+            console.warn('Child process did not respond to SIGTERM. Sending SIGKILL to force exit.');
+            childProcess.kill('SIGKILL');
         }
 
         // TODO test to see if I still need this.
@@ -168,34 +176,13 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
         deleteTemporaryDirectory(reactAppDirObj);
     }
 
+    // TODO remove before deploy to production.
     if (count === 1) {
         process.exit(0);
     } else {
         count++;
     }
+
+    // Exit node process with code success to avoid CRON automatic retrial
+    process.exit(0);
 })();
-
-
-
-
-
-
-
-
-// import { saveErrorInfo } from "./lib/firestore";
-
-// const appErrorData = {
-//     prompt: "some prompt",
-//     error: ["error 1", "error 2"],
-//     appDotJs: "some app.js code",
-//     packageDotJson: "some pacakage.json code",
-//     tailwindJSdotConfig: "some tailwind config"
-// };
-
-// (async () => {
-//     try {
-//         await saveErrorInfo(appErrorData);
-//     } catch (error: any) {
-//         console.log(error);
-//     }
-// })();
