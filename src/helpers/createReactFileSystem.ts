@@ -2,23 +2,21 @@ import fs from 'fs';
 import path from 'path';
 import tmp from 'tmp';
 
-// Create a temporary directory
-export const reactAppDirObj = tmp.dirSync({ unsafeCleanup: true });
-export const reactAppDir: string = reactAppDirObj.name;
-// Create the public and src directories
-const publicDir = path.join(reactAppDir, 'public');
-const srcDir = path.join(reactAppDir, 'src');
-
-fs.mkdirSync(publicDir);
-fs.mkdirSync(srcDir);
-
 interface TmpDirObject {
   name: string;
   removeCallback: () => void;
 }
 
+export function createTemporaryFileSystem(appDotJS: string, packageDotJSON: string): Record<string, any> {
+  // Create a temporary directory
+  const reactAppDirObj = tmp.dirSync({ unsafeCleanup: true });
+  const reactAppDir: string = reactAppDirObj.name;
+  // Create the public and src directories
+  const publicDir = path.join(reactAppDir, 'public');
+  const srcDir = path.join(reactAppDir, 'src');
 
-export function createTemporaryFileSystem(appDotJS: string, packageDotJSON: string): void {
+  fs.mkdirSync(publicDir);
+  fs.mkdirSync(srcDir);
   const indexHtmlContent: string = `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -58,6 +56,11 @@ export function createTemporaryFileSystem(appDotJS: string, packageDotJSON: stri
   fs.writeFileSync(path.join(reactAppDir, 'package.json'), packageDotJSON);
   fs.writeFileSync(path.join(publicDir, 'index.html'), indexHtmlContent);
   fs.writeFileSync(path.join(srcDir, 'App.js'), appDotJS);
+
+  return {
+    reactAppDirObj: reactAppDirObj,
+    reactAppDir: reactAppDir
+  }
 }
 
 export function deleteTemporaryDirectory(tmpDirObject: TmpDirObject): void {
@@ -65,7 +68,7 @@ export function deleteTemporaryDirectory(tmpDirObject: TmpDirObject): void {
 }
 
 
-// Recursive function to print of file structure.
+// Recursive function to print the file structure.
 function listDirectoryStructure(dir: string, prefix = ''): void {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
 

@@ -1,73 +1,12 @@
-// // TODO use deleteTemporaryDirectory with reactAppDirObj as input to clear up the temp memory after each captured react app process.
-// import { reactAppDir, reactAppDirObj, deleteTemporaryDirectory } from './helpers/createReactFileSystem';
-// import { installAndBuild, runReactAppInDev, clearPortForReactAppLaunch } from './helpers/buildReactApp';
-// import puppeteer, { Browser, Page } from 'puppeteer';
-// import { saveErrorInfo } from "./lib/firestore";
+// TODO use deleteTemporaryDirectory with reactAppDirObj as input to clear up the temp memory after each captured react app process.
+import { createTemporaryFileSystem, deleteTemporaryDirectory } from './helpers/createReactFileSystem';
+import { installAndBuild, runReactAppInDev, clearPortForReactAppLaunch } from './helpers/buildReactApp';
+import puppeteer, { Browser, Page } from 'puppeteer';
+import { saveErrorInfo } from "./lib/firestore";
 
+const fs = require('fs');
+const path = require('path');
 
-// async function captureReactAppOutput(logErrorsOnly = true): Promise<void> {
-//     const errorSet = new Set<string>();
-//     const browser: Browser = await puppeteer.launch({ headless: true });
-//     const page: Page = await browser.newPage();
-
-//     !logErrorsOnly && page.on('console', (msg) => {
-//         console.log(`React App Console [${msg.type()}]:`, msg.text());
-//     });
-
-//     // Capture uncaught exceptions from the React app
-//     page.on('pageerror', (err) => {
-//         // console.log('React App Error:', err.message);
-//         errorSet.add(err.message);
-//     });
-
-//     await page.goto('http://localhost:3000');
-//     await new Promise(r => setTimeout(r, 5000)); // Wait for 5 seconds for everything to load
-
-//     // TODO return the errorSet and then loop over the errors in the main function and pass them to a different function that you import
-//     // that deals with saving them in the DB. Make this function part of a file in lib folder. 
-//     console.log(`Captured React App ERRORS:`, [...errorSet]);
-
-
-//     await browser.close();
-// }
-
-// (async () => {
-//     // Perform child_process in-sync opperations.
-//     try {
-//         clearPortForReactAppLaunch(3000);
-//         installAndBuild(reactAppDir);
-//     } catch (error: any) {
-//         console.error(error);
-//         process.exit(1);
-//     }
-
-//     // Run async child_process with react dev server.
-//     const { childProcess, started } = runReactAppInDev(reactAppDir);
-//     try {
-//         await started;
-//         console.log("Child Process successfully started React App in Dev.");
-//     } catch (error: any) {
-//         console.error(`ERROR: when trying to run the React app: ${error}`);
-//         process.exit(1);
-//     }
-
-//     console.log("Back in the main thread. Should call captureReactAppOutput to start headless browser...");
-//     await captureReactAppOutput();
-
-//     if (childProcess.kill()) {
-//         console.log("Child process has been killed. Main process should exit in 5 seconds...")
-//     } else {
-//         console.error("Unable to kill child_process.")
-//     }
-
-//     // Force nodejs process to terminate which will also terminate the dev react server on the child_process.
-//     await new Promise(r => setTimeout(r, 5000));
-//     process.exit(0);
-// })();
-
-
-import fs from 'fs';
-import path from 'path';
 
 const PACKAGE_JSON_TEMPLATE = `
 "dependencies": {
@@ -93,71 +32,149 @@ const PACKAGE_JSON_TEMPLATE = `
 }
 }`;
 
-(async () => {
-    const fs = require('fs');
-    const path = require('path');
+async function captureReactAppOutput(logErrorsOnly = true): Promise<Array<string>> {
+    const errorSet = new Set<string>();
+    const browser: Browser = await puppeteer.launch({ headless: true });
+    const page: Page = await browser.newPage();
 
+    !logErrorsOnly && page.on('console', (msg) => {
+        console.log(`React App Console [${msg.type()}]:`, msg.text());
+    });
+
+    // Capture uncaught exceptions from the React app
+    page.on('pageerror', (err) => {
+        // console.log('React App Error:', err.message);
+        errorSet.add(err.message);
+    });
+
+    await page.goto('http://localhost:3000');
+    // Wait for 2 seconds for everything to load
+    // TODO test to see if we need to timeout at all in order to capture errors.
+    await new Promise(r => setTimeout(r, 2000));
+
+    await browser.close();
+
+    console.log(`Captured React App ERRORS:`, [...errorSet]);
+    return [...errorSet];
+}
+
+function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<string, string> | null {
+    // LLM response code
+    const LLMresponse = heliconeData.responseBody.choices[0].message.content;
+
+    // Extract the content between the three backticks
+    const regex = /```([\s\S]*?)```/g;
+    const match = regex.exec(LLMresponse);
+
+    if (match && match[1]) {
+        let extractedContent = match[1].trim();
+
+        // Split the content by newline and remove the first line as it's not necessary
+        const lines = extractedContent.split('\n').slice(1);
+        extractedContent = lines.join('\n');
+
+        // Extract imported libraries
+        const importLines = lines.filter(line => line.startsWith('import'));
+        const libraries = importLines.map(line => {
+            const match = line.match(/'([^']+)'/);
+            return match ? match[1] : null;
+        }).filter(lib => lib && !lib.includes('react') && !lib.includes('tailwind'));
+
+        // Modify PACKAGE_JSON_TEMPLATE to include the libraries
+        const dependenciesIndex = PACKAGE_JSON_TEMPLATE.indexOf('"dependencies": {') + 17;
+        const dependenciesToAdd = libraries.map(lib => `"${lib}": "*"`).join(',\n');
+        const modifiedPackageJson = [
+            PACKAGE_JSON_TEMPLATE.slice(0, dependenciesIndex),
+            dependenciesToAdd,
+            libraries.length > 0 ? ',' : '', // Add comma after the last new library
+            PACKAGE_JSON_TEMPLATE.slice(dependenciesIndex)
+        ].join('');
+
+        return {
+            prompt: heliconeData.prompt,
+            packageDotJSON: modifiedPackageJson,
+            appDotJS: extractedContent,
+        }
+    } else {
+        return null;
+    }
+}
+
+
+(async () => {
     const filePath = path.join(__dirname, '..', 'helicone_gitwit_react_results.json');
     const rawData = fs.readFileSync(filePath, 'utf-8');
     const jsonData = JSON.parse(rawData);
 
     let count = 0;
 
-    jsonData.forEach((entry: any) => {
-        //TODO delete temporary file directory
+    for (const entry of jsonData) {
+        // Grab necessary data from helicone
+        const cleanedHeliconeData = getCleanedHeliconeData(entry);
+        if (!cleanedHeliconeData) continue;
 
-        // LLM response code
-        const LLMresponse = entry.responseBody.choices[0].message.content;
+        // Create Temporary Folder/File Structure
+        const { reactAppDirObj, reactAppDir } = createTemporaryFileSystem(cleanedHeliconeData.appDotJS, cleanedHeliconeData.packageDotJSON);
 
-        // Extract the content between the three backticks
-        const regex = /```([\s\S]*?)```/g;
-        const match = regex.exec(LLMresponse);
-
-        if (match && match[1]) {
-            let extractedContent = match[1].trim();
-
-            // Split the content by newline and remove the first line as it's not necessary
-            const lines = extractedContent.split('\n').slice(1);
-            extractedContent = lines.join('\n');
-
-            // Extract imported libraries
-            const importLines = lines.filter(line => line.startsWith('import'));
-            const libraries = importLines.map(line => {
-                const match = line.match(/'([^']+)'/);
-                return match ? match[1] : null;
-            }).filter(lib => lib && !lib.includes('react') && !lib.includes('tailwind'));
-
-            // Modify PACKAGE_JSON_TEMPLATE to include the libraries
-            const dependenciesIndex = PACKAGE_JSON_TEMPLATE.indexOf('"dependencies": {') + 17;
-            const dependenciesToAdd = libraries.map(lib => `"${lib}": "*"`).join(',\n');
-            const modifiedPackageJson = [
-                PACKAGE_JSON_TEMPLATE.slice(0, dependenciesIndex),
-                dependenciesToAdd,
-                libraries.length > 0 ? ',' : '', // Add comma after the last new library
-                PACKAGE_JSON_TEMPLATE.slice(dependenciesIndex)
-            ].join('');
-
-            console.log('Modified PACKAGE_JSON_TEMPLATE:', modifiedPackageJson);
-
-            console.log('Extracted Content:', extractedContent);
-
-            // TODO pass packahe.json and app.js to createReactFileSystem.ts to create a new file system.
-            // RUN all of the child processes to eventually capture all of the errors in the set. 
-            // Pass the errors Set alongside all of the ErrorData to saveErrorInfo.
-            // Test it all together.
+        // Perform child_process in-sync opperations.
+        try {
+            clearPortForReactAppLaunch(3000);
+            installAndBuild(reactAppDir);
+        } catch (error: any) {
+            deleteTemporaryDirectory(reactAppDirObj);
+            console.error(error);
+            continue;
         }
 
-        if (count === 1) {
-            process.exit(0);
+        // Run async child_process with react dev server.
+        const { childProcess, started } = runReactAppInDev(reactAppDir);
+        try {
+            await started;
+            console.log("Child Process successfully started React App in Dev.");
+        } catch (error: any) {
+            deleteTemporaryDirectory(reactAppDirObj);
+            console.error(`ERROR: when trying to run the React app: ${error}`);
+            continue;
+        }
+
+        // Create headless browser and capture errors, if any.
+        console.log("Back in the main thread. Should call captureReactAppOutput to start headless browser...");
+        const reactAppErrors = await captureReactAppOutput();
+
+        // Only save this React App data if it has an error.
+        if (reactAppErrors.length) {
+            try {
+                await saveErrorInfo({
+                    prompt: cleanedHeliconeData.prompt,
+                    errors: reactAppErrors,
+                    appDotJs: cleanedHeliconeData.appDotJS,
+                    packageDotJson: cleanedHeliconeData.packageDotJSON,
+                });
+            } catch (error: any) {
+                console.error(`Unable to save react app errors to DB: ${error}`)
+            }
+        }
+
+        if (childProcess.kill()) {
+            console.log("Child process has been killed. Main process should exit in 5 seconds...")
         } else {
-            count++;
+            console.error("Unable to kill child_process.")
         }
-    });
 
+        // TODO test to see if I still need this.
+        await new Promise(r => setTimeout(r, 1000));
 
+        // Delete the Temporary Folder/File Structure.
+        deleteTemporaryDirectory(reactAppDirObj);
+    }
 
-
+    if (count === 1) {
+        process.exit(0);
+    } else {
+        count++;
+    }
 })();
+
 
 
 

@@ -6,7 +6,7 @@ const { getFirestore, Timestamp, FieldValue, Filter } = require('firebase-admin/
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
-// Approach that uses a json. Not good in production.
+// Approach that uses a json. Not good in production:
 // const serviceAccount = require('../credentials/firestore-credentials.json');
 // Approach that uses env variables. Can be good enough in production but not great on VMs. Need to ssh and export the env variables to ~/.bashrc or ~/.profile.
 // TODO Use smth like AWS EC2 Parameter Store and the AWS SDK to make it fully production ready.
@@ -21,7 +21,7 @@ const db = getFirestore();
 
 type ErrorData = {
     prompt: string;
-    error: Array<string>;
+    errors: Array<string>;
     appDotJs: string;
     packageDotJson: string;
 }
@@ -31,7 +31,7 @@ export async function saveErrorInfo(errorData: ErrorData): Promise<void> {
 
     try {
         await docRef.set({
-            error: errorData.error,
+            errors: errorData.errors,
             prompt: errorData.prompt,
             appDotJs: errorData.appDotJs,
             packageDotJson: errorData.packageDotJson,
