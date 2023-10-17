@@ -82,15 +82,3 @@ function listDirectoryStructure(dir: string, prefix = ''): void {
     }
   }
 }
-// Call the function for the main temp directory
-// listDirectoryStructure(reactAppDir);
-
-// // List of files to check
-// const files = ['index.html', 'App.js', 'index.js', 'tailwind-config.js', 'package.json'];
-
-// // Loop through each file and log its content
-// files.forEach((file) => {
-//     const filePath = path.join(reactAppDir, file);
-//     const content = fs.readFileSync(filePath, 'utf-8');
-//     console.log(`\nContents of ${file}:\n`, content);
-// });
