@@ -38,7 +38,7 @@ export function runReactAppInDev(reactAppPath: string): { childProcess: ChildPro
         cwd: reactAppPath
     });
 
-    const started = new Promise<void>((resolve, reject) => {
+    const started = new Promise<void>((resolve, _) => {
         child.stdout.on('data', (data) => {
             console.log(`STDOUT child_process: ${data}`);
             if (data.includes('Project is running')) {

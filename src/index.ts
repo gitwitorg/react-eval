@@ -174,16 +174,22 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
 
         if (childProcess.kill('SIGTERM')) {
             console.log("Signal sent to child process to terminate.");
+
+            const timeoutDuration = 3000;
+            const timeout = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Graceful shutdown timeout')), timeoutDuration);
+            });
+
             try {
-                await exited;
+                // await exited or timeout, whichever finishes first.
+                await Promise.race([exited, timeout]);
                 console.log("Child process has been killed. Main process can continue execution...");
-            } catch (error: any) {
-                console.error('Unable to gracefully kill child process...')
+            } catch (error) {
+                console.warn('Child process did not respond to SIGTERM or graceful shutdown timeout. Sending SIGKILL to force exit.');
+                childProcess.kill('SIGKILL');
             }
-        } else {
-            console.warn('Child process did not respond to SIGTERM. Sending SIGKILL to force exit.');
-            childProcess.kill('SIGKILL');
         }
+
 
         // TODO test to see if I still need this.
         await new Promise(r => setTimeout(r, 1000));
