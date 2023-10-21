@@ -122,7 +122,7 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
     const jsonData = JSON.parse(rawData);
 
     // TODO remove before deploy to production.
-    let count = 0;
+    // let count = 0;
 
     for (const entry of jsonData) {
         // Grab necessary data from helicone
@@ -198,11 +198,11 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
         deleteTemporaryDirectory(reactAppDirObj);
 
         // TODO remove before deploy to production.
-        if (count === 1) {
-            process.exit(0);
-        } else {
-            count++;
-        }
+        // if (count === 1) {
+        //     process.exit(0);
+        // } else {
+        //     count++;
+        // }
     }
 
     // Exit node process with code success to avoid CRON automatic retrial
