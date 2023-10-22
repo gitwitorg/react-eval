@@ -2,12 +2,18 @@
 
 ## Get started:
 
+If running macOS, specify the path to Chrome for Puppeteer:
+
+```bash
+echo 'CHROME_BIN="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"\n' >> .env
+```
+
 Configure the Firestore database: In a Firebase project, navigate to Project settings -> Service accounts, Generate new private key. Take the contents of this file, and remove all newlines to get the configuration string `{ "type": "service_account", ... }`.
 
 Store the configuration string in .env:
 
 ```bash
-echo 'FIRESTORE_CREDENTIALS={ "type": "service_account", ... }' > .env
+echo 'FIRESTORE_CREDENTIALS={ "type": "service_account", ... }\n' >> .env
 ```
 
 Run:
