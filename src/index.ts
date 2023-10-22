@@ -15,7 +15,7 @@ const PACKAGE_JSON_TEMPLATE = `
                 "react-scripts": "^4.0.0"
 },
 "scripts": {
-    "start": "react-scripts --openssl-legacy-provider start"
+    "start": "BROWSER=none react-scripts --openssl-legacy-provider start"
 },
 "main": "./src/index.js",
     "browserslist": {
