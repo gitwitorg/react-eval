@@ -34,7 +34,10 @@ const PACKAGE_JSON_TEMPLATE = `
 
 async function captureReactAppOutput(logErrorsOnly = true): Promise<Array<string>> {
     const errorSet = new Set<string>();
-    const browser: Browser = await puppeteer.launch({ headless: true });
+    const browser: Browser = await puppeteer.launch({
+        headless: true,
+        executablePath: process.env.CHROME_BIN,
+    });
     const page: Page = await browser.newPage();
 
     !logErrorsOnly && page.on('console', (msg) => {
