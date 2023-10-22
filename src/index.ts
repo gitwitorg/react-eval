@@ -3,7 +3,7 @@ import { installReactDependencies, runReactAppInDev, clearPortForReactAppLaunch 
 import puppeteer, { Browser, Page } from 'puppeteer';
 import { saveErrorInfo } from "./lib/firestore";
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 
 
@@ -124,6 +124,12 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
     // TODO remove before deploy to production.
     // let count = 0;
 
+    // Create Temporary Folder/File Structure
+    console.log("Creating template app...");
+    const { reactAppDirObj: templateAppDirObj, reactAppDir: templateAppDir } = createTemporaryFileSystem("/* */", PACKAGE_JSON_TEMPLATE);
+    console.log("Installing dependencies for template app...");
+    installReactDependencies(templateAppDir);
+
     for (const entry of jsonData) {
         // Grab necessary data from helicone
         const cleanedHeliconeData = getCleanedHeliconeData(entry);
@@ -131,6 +137,8 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
 
         // Create Temporary Folder/File Structure
         const { reactAppDirObj, reactAppDir } = createTemporaryFileSystem(cleanedHeliconeData.appDotJS, cleanedHeliconeData.packageDotJSON);
+        // Copy the node_modules from the template app to the new app.
+        fs.copySync(templateAppDir + "/node_modules", reactAppDir  + "/node_modules");
 
         // Perform child_process in-sync opperations.
         try {
@@ -204,6 +212,9 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
         //     count++;
         // }
     }
+
+    // Delete the Temporary Folder/File Structure.
+    deleteTemporaryDirectory(templateAppDirObj);
 
     // Exit node process with code success to avoid CRON automatic retrial
     process.exit(0);
