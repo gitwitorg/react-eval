@@ -141,7 +141,7 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
         // Create Temporary Folder/File Structure
         const { reactAppDirObj, reactAppDir } = createTemporaryFileSystem(cleanedHeliconeData.appDotJS, cleanedHeliconeData.packageDotJSON);
         // Copy the node_modules from the template app to the new app.
-        fs.copySync(templateAppDir + "/node_modules", reactAppDir  + "/node_modules");
+        fs.copySync(templateAppDir + "/node_modules", reactAppDir + "/node_modules");
 
         // Perform child_process in-sync opperations.
         try {
