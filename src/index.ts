@@ -32,7 +32,7 @@ const PACKAGE_JSON_TEMPLATE = `
 }
 }`;
 
-async function captureReactAppOutput(logErrorsOnly = true): Promise<Array<string>> {
+async function captureReactAppOutput(logErrorsOnly = true): Promise<{ errors: string[], screenshot: string | undefined }> {
     const errorSet = new Set<string>();
     const browser: Browser = await puppeteer.launch({
         headless: true,
@@ -60,12 +60,15 @@ async function captureReactAppOutput(logErrorsOnly = true): Promise<Array<string
     // TODO look for page onload event.
     await new Promise(r => setTimeout(r, 2000));
 
+    // Capture a screenshot
+    const screenshot = await page.screenshot({ encoding: 'base64' });
+
     await browser.close();
 
     // Remove the child_processes-specific error message from the set
     errorSet.delete("process is not defined");
 
-    return [...errorSet];
+    return { errors: [...errorSet], screenshot };
 }
 
 function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<string, string> | null {
@@ -166,21 +169,20 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
 
         // Create headless browser and capture errors, if any.
         console.log("Back in the main thread. Should call captureReactAppOutput to start headless browser...");
-        const reactAppErrors = await captureReactAppOutput(false);
+        const { errors: reactAppErrors, screenshot: reactAppScreenshot } = await captureReactAppOutput(false);
 
         // Only save this React App data if it has an error.
-        if (reactAppErrors.length) {
-            try {
-                await saveErrorInfo({
-                    prompt: cleanedHeliconeData.prompt,
-                    errors: reactAppErrors,
-                    appDotJs: cleanedHeliconeData.appDotJS,
-                    packageDotJson: cleanedHeliconeData.packageDotJSON,
-                    projectID: cleanedHeliconeData.projectID
-                });
-            } catch (error: any) {
-                console.error(`Unable to save react app errors to DB: ${error}`)
-            }
+        try {
+            await saveErrorInfo({
+                prompt: cleanedHeliconeData.prompt,
+                errors: reactAppErrors,
+                appDotJs: cleanedHeliconeData.appDotJS,
+                packageDotJson: cleanedHeliconeData.packageDotJSON,
+                projectID: cleanedHeliconeData.projectID,
+                screenshot: reactAppScreenshot,
+            });
+        } catch (error: any) {
+            console.error(`Unable to save react app errors to DB: ${error}`)
         }
 
         if (childProcess.kill('SIGTERM')) {

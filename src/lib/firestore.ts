@@ -24,6 +24,7 @@ type ErrorData = {
     appDotJs: string;
     packageDotJson: string;
     projectID: string;
+    screenshot?: string;
 }
 
 export async function saveErrorInfo(errorData: ErrorData): Promise<void> {
@@ -35,6 +36,7 @@ export async function saveErrorInfo(errorData: ErrorData): Promise<void> {
             prompt: errorData.prompt,
             appDotJs: errorData.appDotJs,
             packageDotJson: errorData.packageDotJson,
+            screenshot: errorData.screenshot,
         });
     } catch (error: any) {
         throw new Error(`Unable to save react app error info to DB: ${error}`)
