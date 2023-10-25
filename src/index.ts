@@ -75,14 +75,19 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
     // The response itself is JSON, so we should parse it:
     const LLMresponse = JSON.parse(heliconeData.response)?.content;
 
-    // Extract the content between the three backticks
-    const regex = /```([\s\S]*?)```/g;
-    const match = regex.exec(LLMresponse);
+    // This is the same function as used by the GitWit app.
+    const stripFences = (code: string) => {
+        const parts = code.split(/[\r\n]?```(?!bash)[A-z]*[\r\n]?/g);
+        if (parts.length > 1) {
+            return parts[1];
+        }
+        return "";
+    };
 
-    const extractedContent = match && match[1] ? match[1].trim() : LLMresponse;
+    const extractedContent = stripFences(LLMresponse) || LLMresponse;
 
     // Split the content by newline and remove the first line as it's not necessary
-    const lines = extractedContent.split('\n').slice(1);
+    const lines = extractedContent.split('\n');
 
     // Extract imported libraries
     const importLines = lines.filter((line : string) => line.startsWith('import'));
