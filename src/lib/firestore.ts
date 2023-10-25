@@ -17,6 +17,8 @@ initializeApp({
 
 const db = getFirestore();
 
+const collectionName = process.env.FIRESTORE_COLLECTION_NAME || 'appErrors';
+const screenshot = !!process.env.SCREENSHOT;
 
 type ErrorData = {
     prompt: string;
@@ -24,10 +26,11 @@ type ErrorData = {
     appDotJs: string;
     packageDotJson: string;
     projectID: string;
+    screenshot?: string;
 }
 
 export async function saveErrorInfo(errorData: ErrorData): Promise<void> {
-    const docRef = db.collection('appErrors').doc(errorData.projectID);
+    const docRef = db.collection(collectionName).doc(errorData.projectID);
 
     try {
         await docRef.set({
@@ -35,6 +38,7 @@ export async function saveErrorInfo(errorData: ErrorData): Promise<void> {
             prompt: errorData.prompt,
             appDotJs: errorData.appDotJs,
             packageDotJson: errorData.packageDotJson,
+            ...screenshot ? { screenshot: errorData.screenshot } : false,
         });
     } catch (error: any) {
         throw new Error(`Unable to save react app error info to DB: ${error}`)
@@ -42,7 +46,7 @@ export async function saveErrorInfo(errorData: ErrorData): Promise<void> {
 }
 
 export async function getSpecificAppErrorEntry(uuid: string): Promise<ErrorData | null> {
-    const docRef = db.collection('appErrors').doc(uuid);
+    const docRef = db.collection(collectionName).doc(uuid);
 
     try {
         const docSnapshot = await docRef.get(uuid);
