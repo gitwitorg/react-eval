@@ -134,10 +134,13 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
     installReactDependencies(templateAppDir);
 
     for (const entry of jsonData) {
+        // Logging current entry:
+        console.log(`Current entry is: ${entry.id}`)
+
         // Grab necessary data from helicone
         const cleanedHeliconeData = getCleanedHeliconeData(entry);
         if (!cleanedHeliconeData) {
-            console.error(`Unable to find the response code from LLM. Failure in regex. Entry: ${entry.id}`)
+            console.error(`Unable to find the response code from LLM. Failure in regex.`)
             continue;
         }
 
@@ -160,7 +163,7 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
         const { childProcess, started, exited } = runReactAppInDev(reactAppDir);
         try {
             await started;
-            console.log(`Child Process successfully started React App in Dev. Entry: ${entry.id}`);
+            console.log(`Child Process successfully started React App in Dev.`);
         } catch (error: any) {
             deleteTemporaryDirectory(reactAppDirObj);
             console.error(`ERROR: when trying to run the React app: ${error}`);
