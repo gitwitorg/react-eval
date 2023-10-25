@@ -82,15 +82,15 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
     const lines = extractedContent.split('\n').slice(1);
 
     // Extract imported libraries
-    const importLines = lines.filter(line => line.startsWith('import'));
-    const libraries = importLines.map(line => {
+    const importLines = lines.filter((line : string) => line.startsWith('import'));
+    const libraries = importLines.map((line : string) => {
         const match = line.match(/'([^']+)'/);
         return match ? match[1] : null;
-    }).filter(lib => lib !== 'react' && lib !== './tailwind-config.js');
+    }).filter((lib : string) => lib !== 'react' && lib !== './tailwind-config.js');
 
     // Modify PACKAGE_JSON_TEMPLATE to include the libraries
     const dependenciesIndex = PACKAGE_JSON_TEMPLATE.indexOf('"dependencies": {') + 17;
-    const dependenciesToAdd = libraries.map(lib => `"${lib}": "*"`).join(',\n');
+    const dependenciesToAdd = libraries.map((lib : string) => `"${lib}": "*"`).join(',\n');
     const modifiedPackageJson = [
         PACKAGE_JSON_TEMPLATE.slice(0, dependenciesIndex),
         dependenciesToAdd,
