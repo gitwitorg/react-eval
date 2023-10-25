@@ -60,39 +60,3 @@ export function runReactAppInDev(reactAppPath: string): { childProcess: ChildPro
 
     return { childProcess: child, started, exited };
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { spawn } from 'child_process';
-
-// export function installAndBuild(reactAppPath: string): Promise<string> {
-//     return new Promise((resolve, reject) => {
-//         const command = spawn('sh', ['-c', `cd ${reactAppPath} && npm install vite && npm install`]);
-
-//         command.stdout.on('data', (data) => {
-//             console.log(`stdout: ${data}`);
-//         });
-
-//         command.stderr.on('data', (data) => {
-//             console.error(`stderr: ${data}`);
-//         });
-
-//         command.on('close', (code) => {
-//             if (code !== 0) {
-//                 reject(new Error(`Command exited with code: ${code}`));
-//             } else {
-//                 resolve(`Command completed with code: ${code}`);
-//             }
-//         });
-//     });
-// }

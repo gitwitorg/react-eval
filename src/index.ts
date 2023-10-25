@@ -137,14 +137,20 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
     installReactDependencies(templateAppDir);
 
     for (const entry of jsonData) {
+        // Logging current entry:
+        console.log(`Current entry is: ${entry.id}`)
+
         // Grab necessary data from helicone
         const cleanedHeliconeData = getCleanedHeliconeData(entry);
-        if (!cleanedHeliconeData) continue;
+        if (!cleanedHeliconeData) {
+            console.error(`Unable to find the response code from LLM. Failure in regex.`)
+            continue;
+        }
 
         // Create Temporary Folder/File Structure
         const { reactAppDirObj, reactAppDir } = createTemporaryFileSystem(cleanedHeliconeData.appDotJS, cleanedHeliconeData.packageDotJSON);
         // Copy the node_modules from the template app to the new app.
-        fs.copySync(templateAppDir + "/node_modules", reactAppDir  + "/node_modules");
+        fs.copySync(templateAppDir + "/node_modules", reactAppDir + "/node_modules");
 
         // Perform child_process in-sync opperations.
         try {
@@ -160,7 +166,7 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
         const { childProcess, started, exited } = runReactAppInDev(reactAppDir);
         try {
             await started;
-            console.log("Child Process successfully started React App in Dev.");
+            console.log(`Child Process successfully started React App in Dev.`);
         } catch (error: any) {
             deleteTemporaryDirectory(reactAppDirObj);
             console.error(`ERROR: when trying to run the React app: ${error}`);
