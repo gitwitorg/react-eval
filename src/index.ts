@@ -160,7 +160,7 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
         const { childProcess, started, exited } = runReactAppInDev(reactAppDir);
         try {
             await started;
-            console.log("Child Process successfully started React App in Dev.");
+            console.log(`Child Process successfully started React App in Dev. Entry: ${entry.id}`);
         } catch (error: any) {
             deleteTemporaryDirectory(reactAppDirObj);
             console.error(`ERROR: when trying to run the React app: ${error}`);
