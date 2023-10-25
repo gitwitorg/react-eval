@@ -54,11 +54,7 @@ async function captureReactAppOutput(logErrorsOnly = true): Promise<{ errors: st
         errorSet.add(err.message);
     });
 
-    await page.goto('http://localhost:3000');
-    // Wait for 2 seconds for everything to load
-    // TODO test to see if we need to timeout at all in order to capture errors.
-    // TODO look for page onload event.
-    await new Promise(r => setTimeout(r, 2000));
+    await page.goto('http://localhost:3000', { waitUntil: 'load', timeout: 0 });
 
     // Capture a screenshot
     const screenshot = await page.screenshot({ encoding: 'base64' });
