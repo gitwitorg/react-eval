@@ -56,3 +56,4 @@ Follow the get started settings above.
 ## Additional settings
 
 - PORT (optional): The port to test React apps on.
+- FIRESTORE_COLLECTION_NAME (optional): The collection to save results to.
