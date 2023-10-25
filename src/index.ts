@@ -137,7 +137,7 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
         // Grab necessary data from helicone
         const cleanedHeliconeData = getCleanedHeliconeData(entry);
         if (!cleanedHeliconeData) {
-            console.error("Unable to find the response code from LLM. Failure in regex.")
+            console.error(`Unable to find the response code from LLM. Failure in regex. Entry: ${entry.id}`)
             continue;
         }
 
