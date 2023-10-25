@@ -69,52 +69,40 @@ async function captureReactAppOutput(logErrorsOnly = true): Promise<Array<string
 }
 
 function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<string, string> | null {
-    // LLM response code
-    const LLMresponse = heliconeData.response;
+    // The response itself is JSON, so we should parse it:
+    const LLMresponse = JSON.parse(heliconeData.response)?.content;
 
     // Extract the content between the three backticks
     const regex = /```([\s\S]*?)```/g;
     const match = regex.exec(LLMresponse);
 
-    if (match && match[1]) {
-        let extractedContent = match[1].trim();
-        // Convert escaped newlines to actual newlines
-        extractedContent = extractedContent.replace(/\\n/g, '\n');
-        // Remove the Unicode escape sequences
-        extractedContent = extractedContent.replace(/\\\\/g, '\\');
-        extractedContent = extractedContent.replace(/\\\"/g, '\"');
-        // Replace all Unicode escape sequences
-        extractedContent = extractedContent.replace(/\\u([\dA-Fa-f]{4})/g, (_, g) => String.fromCharCode(parseInt(g, 16)));
+    const extractedContent = match && match[1] ? match[1].trim() : LLMresponse;
 
-        // Split the content by newline and remove the first line as it's not necessary
-        const lines = extractedContent.split('\n').slice(1);
-        extractedContent = lines.join('\n');
+    // Split the content by newline and remove the first line as it's not necessary
+    const lines = extractedContent.split('\n').slice(1);
 
-        // Extract imported libraries
-        const importLines = lines.filter(line => line.startsWith('import'));
-        const libraries = importLines.map(line => {
-            const match = line.match(/'([^']+)'/);
-            return match ? match[1] : null;
-        }).filter(lib => lib !== 'react' && lib !== './tailwind-config.js');
+    // Extract imported libraries
+    const importLines = lines.filter((line : string) => line.startsWith('import'));
+    const libraries = importLines.map((line : string) => {
+        const match = line.match(/'([^']+)'/);
+        return match ? match[1] : null;
+    }).filter((lib : string) => lib !== 'react' && lib !== './tailwind-config.js');
 
-        // Modify PACKAGE_JSON_TEMPLATE to include the libraries
-        const dependenciesIndex = PACKAGE_JSON_TEMPLATE.indexOf('"dependencies": {') + 17;
-        const dependenciesToAdd = libraries.map(lib => `"${lib}": "*"`).join(',\n');
-        const modifiedPackageJson = [
-            PACKAGE_JSON_TEMPLATE.slice(0, dependenciesIndex),
-            dependenciesToAdd,
-            libraries.length > 0 ? ',' : '', // Add comma after the last new library
-            PACKAGE_JSON_TEMPLATE.slice(dependenciesIndex)
-        ].join('');
+    // Modify PACKAGE_JSON_TEMPLATE to include the libraries
+    const dependenciesIndex = PACKAGE_JSON_TEMPLATE.indexOf('"dependencies": {') + 17;
+    const dependenciesToAdd = libraries.map((lib : string) => `"${lib}": "*"`).join(',\n');
+    const modifiedPackageJson = [
+        PACKAGE_JSON_TEMPLATE.slice(0, dependenciesIndex),
+        dependenciesToAdd,
+        libraries.length > 0 ? ',' : '', // Add comma after the last new library
+        PACKAGE_JSON_TEMPLATE.slice(dependenciesIndex)
+    ].join('');
 
-        return {
-            prompt: heliconeData.prompt,
-            packageDotJSON: modifiedPackageJson,
-            appDotJS: extractedContent,
-            projectID: heliconeData.id,
-        }
-    } else {
-        return null;
+    return {
+        prompt: heliconeData.prompt,
+        packageDotJSON: modifiedPackageJson,
+        appDotJS: extractedContent,
+        projectID: heliconeData.id,
     }
 }
 
