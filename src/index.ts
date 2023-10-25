@@ -69,8 +69,8 @@ async function captureReactAppOutput(logErrorsOnly = true): Promise<Array<string
 }
 
 function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<string, string> | null {
-    // LLM response code
-    const LLMresponse = heliconeData.response;
+    // The response itself is JSON, so we should parse it:
+    const LLMresponse = JSON.parse(heliconeData.response)?.content;
 
     // Extract the content between the three backticks
     const regex = /```([\s\S]*?)```/g;
@@ -78,17 +78,9 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
 
     if (match && match[1]) {
         let extractedContent = match[1].trim();
-        // Convert escaped newlines to actual newlines
-        extractedContent = extractedContent.replace(/\\n/g, '\n');
-        // Remove the Unicode escape sequences
-        extractedContent = extractedContent.replace(/\\\\/g, '\\');
-        extractedContent = extractedContent.replace(/\\\"/g, '\"');
-        // Replace all Unicode escape sequences
-        extractedContent = extractedContent.replace(/\\u([\dA-Fa-f]{4})/g, (_, g) => String.fromCharCode(parseInt(g, 16)));
 
         // Split the content by newline and remove the first line as it's not necessary
         const lines = extractedContent.split('\n').slice(1);
-        extractedContent = lines.join('\n');
 
         // Extract imported libraries
         const importLines = lines.filter(line => line.startsWith('import'));
