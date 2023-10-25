@@ -136,7 +136,10 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
     for (const entry of jsonData) {
         // Grab necessary data from helicone
         const cleanedHeliconeData = getCleanedHeliconeData(entry);
-        if (!cleanedHeliconeData) continue;
+        if (!cleanedHeliconeData) {
+            console.error("Unable to find the response code from LLM. Failure in regex.")
+            continue;
+        }
 
         // Create Temporary Folder/File Structure
         const { reactAppDirObj, reactAppDir } = createTemporaryFileSystem(cleanedHeliconeData.appDotJS, cleanedHeliconeData.packageDotJSON);
