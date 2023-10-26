@@ -126,91 +126,99 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
     installReactDependencies(templateAppDir);
 
     for (const entry of jsonData) {
-        // Logging current entry:
-        console.log(`Current entry is: ${entry.id}`)
-
-        // Grab necessary data from helicone
-        const cleanedHeliconeData = getCleanedHeliconeData(entry);
-        if (!cleanedHeliconeData) {
-            console.error(`Unable to find the response code from LLM. Failure in regex.`)
-            continue;
-        }
-
-        // Create Temporary Folder/File Structure
-        const { reactAppDirObj, reactAppDir } = createTemporaryFileSystem(cleanedHeliconeData.appDotJS, cleanedHeliconeData.packageDotJSON);
-        // Copy the node_modules from the template app to the new app.
-        fs.copySync(templateAppDir + "/node_modules", reactAppDir + "/node_modules");
-
-        // Perform child_process in-sync opperations.
+        // Wrap each entry in a try/catch to avoid the entire process from failing.
         try {
-            clearPortForReactAppLaunch(3000);
-            installReactDependencies(reactAppDir);
-        } catch (error: any) {
-            deleteTemporaryDirectory(reactAppDirObj);
-            console.error(error);
-            continue;
-        }
 
-        // Run async child_process with react dev server.
-        const { childProcess, started, exited } = runReactAppInDev(reactAppDir);
-        try {
-            await started;
-            console.log(`Child Process successfully started React App in Dev.`);
-        } catch (error: any) {
-            deleteTemporaryDirectory(reactAppDirObj);
-            console.error(`ERROR: when trying to run the React app: ${error}`);
-            continue;
-        }
+            // Logging current entry:
+            console.log(`Current entry is: ${entry.id}`)
 
-        // Create headless browser and capture errors, if any.
-        console.log("Back in the main thread. Should call captureReactAppOutput to start headless browser...");
-        const { errors: reactAppErrors, screenshot: reactAppScreenshot } = await captureReactAppOutput(false);
-
-        // Only save this React App data if it has an error.
-        try {
-            await saveErrorInfo({
-                prompt: cleanedHeliconeData.prompt,
-                errors: reactAppErrors,
-                appDotJs: cleanedHeliconeData.appDotJS,
-                packageDotJson: cleanedHeliconeData.packageDotJSON,
-                projectID: cleanedHeliconeData.projectID,
-                screenshot: reactAppScreenshot,
-            });
-        } catch (error: any) {
-            console.error(`Unable to save react app errors to DB: ${error}`)
-        }
-
-        if (childProcess.kill('SIGTERM')) {
-            console.log("Signal sent to child process to terminate.");
-
-            const timeoutDuration = 3000;
-            const timeout = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Graceful shutdown timeout')), timeoutDuration);
-            });
-
-            try {
-                // await exited or timeout, whichever finishes first.
-                await Promise.race([exited, timeout]);
-                console.log("Child process has been killed. Main process can continue execution...");
-            } catch (error) {
-                console.warn('Child process did not respond to SIGTERM or graceful shutdown timeout. Sending SIGKILL to force exit.');
-                childProcess.kill('SIGKILL');
+            // Grab necessary data from helicone
+            const cleanedHeliconeData = getCleanedHeliconeData(entry);
+            if (!cleanedHeliconeData) {
+                console.error(`Unable to find the response code from LLM. Failure in regex.`)
+                continue;
             }
+
+            // Create Temporary Folder/File Structure
+            const { reactAppDirObj, reactAppDir } = createTemporaryFileSystem(cleanedHeliconeData.appDotJS, cleanedHeliconeData.packageDotJSON);
+            // Copy the node_modules from the template app to the new app.
+            fs.copySync(templateAppDir + "/node_modules", reactAppDir + "/node_modules");
+
+            // Perform child_process in-sync opperations.
+            try {
+                clearPortForReactAppLaunch(3000);
+                installReactDependencies(reactAppDir);
+            } catch (error: any) {
+                deleteTemporaryDirectory(reactAppDirObj);
+                console.error(error);
+                continue;
+            }
+
+            // Run async child_process with react dev server.
+            const { childProcess, started, exited } = runReactAppInDev(reactAppDir);
+            try {
+                await started;
+                console.log(`Child Process successfully started React App in Dev.`);
+            } catch (error: any) {
+                deleteTemporaryDirectory(reactAppDirObj);
+                console.error(`ERROR: when trying to run the React app: ${error}`);
+                continue;
+            }
+
+            // Create headless browser and capture errors, if any.
+            console.log("Back in the main thread. Should call captureReactAppOutput to start headless browser...");
+            const { errors: reactAppErrors, screenshot: reactAppScreenshot } = await captureReactAppOutput(false);
+
+            // Only save this React App data if it has an error.
+            try {
+                await saveErrorInfo({
+                    prompt: cleanedHeliconeData.prompt,
+                    errors: reactAppErrors,
+                    appDotJs: cleanedHeliconeData.appDotJS,
+                    packageDotJson: cleanedHeliconeData.packageDotJSON,
+                    projectID: cleanedHeliconeData.projectID,
+                    screenshot: reactAppScreenshot,
+                });
+            } catch (error: any) {
+                console.error(`Unable to save react app errors to DB: ${error}`)
+            }
+
+            if (childProcess.kill('SIGTERM')) {
+                console.log("Signal sent to child process to terminate.");
+
+                const timeoutDuration = 3000;
+                const timeout = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Graceful shutdown timeout')), timeoutDuration);
+                });
+
+                try {
+                    // await exited or timeout, whichever finishes first.
+                    await Promise.race([exited, timeout]);
+                    console.log("Child process has been killed. Main process can continue execution...");
+                } catch (error) {
+                    console.warn('Child process did not respond to SIGTERM or graceful shutdown timeout. Sending SIGKILL to force exit.');
+                    childProcess.kill('SIGKILL');
+                }
+            }
+
+
+            // TODO test to see if I still need this.
+            await new Promise(r => setTimeout(r, 1000));
+
+            // Delete the Temporary Folder/File Structure.
+            deleteTemporaryDirectory(reactAppDirObj);
+
+            // TODO remove before deploy to production.
+            // if (count === 1) {
+            //     process.exit(0);
+            // } else {
+            //     count++;
+            // }
+
+        } catch (error: any) {
+            console.error(`ERROR: when trying to test the React app: ${error}`);
+            continue;
         }
-
-
-        // TODO test to see if I still need this.
-        await new Promise(r => setTimeout(r, 1000));
-
-        // Delete the Temporary Folder/File Structure.
-        deleteTemporaryDirectory(reactAppDirObj);
-
-        // TODO remove before deploy to production.
-        // if (count === 1) {
-        //     process.exit(0);
-        // } else {
-        //     count++;
-        // }
     }
 
     // Delete the Temporary Folder/File Structure.
