@@ -12,7 +12,7 @@ const PACKAGE_JSON_TEMPLATE = `
     "dependencies": {
         "react": "^18.0.0",
             "react-dom": "^18.0.0",
-                "react-scripts": "^4.0.0"
+                "react-scripts": "^5.0.1"
 },
 "scripts": {
     "start": "BROWSER=none react-scripts --openssl-legacy-provider start"
