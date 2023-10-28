@@ -11,8 +11,8 @@ const PACKAGE_JSON_TEMPLATE = `
 {
     "dependencies": {
         "react": "^18.0.0",
-            "react-dom": "^18.0.0",
-                "react-scripts": "^5.0.1"
+        "react-dom": "^18.0.0",
+        "react-scripts": "^5.0.1"
 },
 "scripts": {
     "start": "BROWSER=none react-scripts --openssl-legacy-provider start"
@@ -67,6 +67,25 @@ async function captureReactAppOutput(logErrorsOnly = true): Promise<{ errors: st
     return { errors: [...errorSet], screenshot };
 }
 
+function extractImportedLibraries(javascriptCode: string): string[] {
+    // Regular expression pattern to match import statements
+    const pattern = /import\s+(?:[\w\s,{}]+)\s+from\s+['"]([^'"]+)['"]/g;
+
+    // Find all matches in the JavaScript code
+    const matches = [...javascriptCode.matchAll(pattern)];
+
+    // Extract and return the unique imported library names as a list
+    const importedLibraryNamesSet = new Set<string>();
+    for (const match of matches) {
+        const [, libraryName] = match;
+        importedLibraryNamesSet.add(libraryName);
+    }
+
+    // Convert the set to an array and return it
+    const importedLibraryNames = Array.from(importedLibraryNamesSet);
+    return importedLibraryNames;
+}
+
 function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<string, string> | null {
     // The response itself is JSON, so we should parse it:
     const LLMresponse = JSON.parse(heliconeData.response)?.content;
@@ -80,27 +99,15 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
         return "";
     };
 
+    // Extract the code from the response.
     const extractedContent = stripFences(LLMresponse) || LLMresponse;
 
-    // Split the content by newline and remove the first line as it's not necessary
-    const lines = extractedContent.split('\n');
-
-    // Extract imported libraries
-    const importLines = lines.filter((line : string) => line.startsWith('import'));
-    const libraries = importLines.map((line : string) => {
-        const match = line.match(/'([^']+)'/);
-        return match ? match[1] : null;
-    }).filter((lib : string) => lib !== 'react' && lib !== './tailwind-config.js');
-
-    // Modify PACKAGE_JSON_TEMPLATE to include the libraries
-    const dependenciesIndex = PACKAGE_JSON_TEMPLATE.indexOf('"dependencies": {') + 17;
-    const dependenciesToAdd = libraries.map((lib : string) => `"${lib}": "*"`).join(',\n');
-    const modifiedPackageJson = [
-        PACKAGE_JSON_TEMPLATE.slice(0, dependenciesIndex),
-        dependenciesToAdd,
-        libraries.length > 0 ? ',' : '', // Add comma after the last new library
-        PACKAGE_JSON_TEMPLATE.slice(dependenciesIndex)
-    ].join('');
+    // Extract the dependencies from the code to build the package.json.
+    let packageJson = JSON.parse(PACKAGE_JSON_TEMPLATE)
+    extractImportedLibraries(extractedContent).forEach((key) => {
+        packageJson.dependencies[key] ??= "*";
+    });
+    const modifiedPackageJson = JSON.stringify(packageJson, null, 4);
 
     return {
         prompt: heliconeData.prompt,
