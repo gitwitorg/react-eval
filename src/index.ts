@@ -54,7 +54,8 @@ async function captureReactAppOutput(logErrorsOnly = true): Promise<{ errors: st
         errorSet.add(err.message);
     });
 
-    await page.goto('http://localhost:3000', { waitUntil: 'load', timeout: 0 });
+    await page.setDefaultNavigationTimeout(10000);
+    await page.goto('http://localhost:3000', { waitUntil: 'load' });
 
     // Capture a screenshot
     const screenshot = await page.screenshot({ encoding: 'base64' });
