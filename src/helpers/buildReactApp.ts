@@ -41,7 +41,7 @@ export function runReactAppInDev(reactAppPath: string): { childProcess: ChildPro
     const started = new Promise<void>((resolve, _) => {
         child.stdout.on('data', (data) => {
             console.log(`STDOUT child_process: ${data}`);
-            if (data.includes('Project is running')) {
+            if (data.includes('webpack compiled successfully') || data.includes('Failed to compile')) {
                 resolve();
             }
         });
