@@ -6,6 +6,7 @@ import { saveErrorInfo } from "./lib/firestore";
 const fs = require('fs-extra');
 const path = require('path');
 
+const dependenciesOnly = process.argv.includes('--dependencies-only');
 
 const PACKAGE_JSON_TEMPLATE = `
 {
@@ -110,7 +111,7 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
     importedLibraries.forEach((key) => {
         packageJson.dependencies[key] ??= "*";
     });
-    if (Object.keys(packageJson.dependencies).length == nDependencies) {
+    if (dependenciesOnly && Object.keys(packageJson.dependencies).length == nDependencies) {
         console.error(`Skipping because the code doesn't import any libraries.`)
         return null;
     }
