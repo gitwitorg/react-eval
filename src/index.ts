@@ -106,13 +106,14 @@ function getCleanedHeliconeData(heliconeData: Record<string, any>): Record<strin
     // Extract the dependencies from the code to build the package.json.
     let packageJson = JSON.parse(PACKAGE_JSON_TEMPLATE)
     const importedLibraries = extractImportedLibraries(extractedContent);
-    if (importedLibraries.length === 0) {
-        console.error(`Skipping because the code doesn't import any libraries.`)
-        return null;
-    }
+    const nDependencies = Object.keys(packageJson.dependencies).length;
     importedLibraries.forEach((key) => {
         packageJson.dependencies[key] ??= "*";
     });
+    if (Object.keys(packageJson.dependencies).length == nDependencies) {
+        console.error(`Skipping because the code doesn't import any libraries.`)
+        return null;
+    }
     const modifiedPackageJson = JSON.stringify(packageJson, null, 4);
 
     return {
