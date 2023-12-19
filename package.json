@@ -20,6 +20,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.8.2",
     "@types/puppeteer": "^7.0.4",
     "@types/tmp": "^0.2.4",
