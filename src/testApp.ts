@@ -10,9 +10,9 @@ import {
 
 import puppeteer, { Browser, Page } from 'puppeteer';
 
-import { PACKAGE_JSON_TEMPLATE } from "./template";
-
 import fs from "fs-extra";
+
+const packageDotJsonData = fs.readFileSync('./app/package.json', 'utf8');
 
 let templateAppDirObj: any = null;
 let templateAppDir: string;
@@ -20,7 +20,7 @@ let templateAppDir: string;
 export function setupTestEnvironment() {
   // Create Temporary Folder/File Structure
   console.log("Creating template app...");
-  ({ reactAppDirObj: templateAppDirObj, reactAppDir: templateAppDir } = createTemporaryFileSystem("/* */", PACKAGE_JSON_TEMPLATE));
+  ({ reactAppDirObj: templateAppDirObj, reactAppDir: templateAppDir } = createTemporaryFileSystem("/* */", packageDotJsonData));
   console.log("Installing dependencies for template app...");
   installReactDependencies(templateAppDir);
 }

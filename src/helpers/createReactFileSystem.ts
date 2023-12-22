@@ -17,38 +17,9 @@ export function createTemporaryFileSystem(appDotJS: string, packageDotJSON: stri
 
   fs.mkdirSync(publicDir);
   fs.mkdirSync(srcDir);
-  const indexHtmlContent: string = `<!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <script src="https://cdn.tailwindcss.com/"></script>
-      <title>Document</title>
-    </head>
-    <body>
-      <div id="root"></div>
-    </body>
-  </html>`;
-  const indexJsContent: string = `import React, { StrictMode } from "react";
-  import { createRoot } from "react-dom/client";
-  
-  import App from "./App";
-  
-  const root = createRoot(document.getElementById("root"));
-  root.render(
-    <StrictMode>
-      <App />
-    </StrictMode>
-  );`;
-  const tailwindJSdotConfig: string = `tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          clifford: '#da373d',
-        }
-      }
-    },
-  }`;
+  const indexHtmlContent = fs.readFileSync('./app/public/index.html', 'utf8');
+  const indexJsContent = fs.readFileSync('./app/src/index.js', 'utf8');
+  const tailwindJSdotConfig = fs.readFileSync('./app/src/tailwind-config.js', 'utf8');
 
   // Write the contents to files
   fs.writeFileSync(path.join(srcDir, 'index.js'), indexJsContent);
@@ -65,20 +36,4 @@ export function createTemporaryFileSystem(appDotJS: string, packageDotJSON: stri
 
 export function deleteTemporaryDirectory(tmpDirObject: TmpDirObject): void {
   tmpDirObject.removeCallback();
-}
-
-
-// Recursive function to print the file structure.
-function listDirectoryStructure(dir: string, prefix = ''): void {
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      console.log(prefix + 'DIR: ' + fullPath);
-      listDirectoryStructure(fullPath, prefix + '  ');
-    } else {
-      console.log(prefix + 'FILE: ' + fullPath);
-    }
-  }
 }

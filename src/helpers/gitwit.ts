@@ -1,4 +1,7 @@
-import { PACKAGE_JSON_TEMPLATE } from "../template";
+import fs from "fs-extra";
+
+const packageDotJsonData = fs.readFileSync('./app/package.json', 'utf8');
+const packageDotJson = JSON.parse(packageDotJsonData);
 
 function extractImportedLibraries(javascriptCode: string): string[] {
   // Regular expression pattern to match import statements
@@ -21,10 +24,9 @@ function extractImportedLibraries(javascriptCode: string): string[] {
 
 export function packageDotJSONFromAppDotJS(appJS: string) {
   // Extract the dependencies from the code to build the package.json.
-  let packageJson = JSON.parse(PACKAGE_JSON_TEMPLATE);
   const importedLibraries = extractImportedLibraries(appJS);
   importedLibraries.forEach((key) => {
-    packageJson.dependencies[key] ??= "*";
+    packageDotJson.dependencies[key] ??= "*";
   });
   return JSON.stringify(packageJson, null, 4);
 }
