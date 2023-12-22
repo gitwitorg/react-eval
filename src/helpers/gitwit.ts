@@ -28,5 +28,5 @@ export function packageDotJSONFromAppDotJS(appJS: string) {
   importedLibraries.forEach((key) => {
     packageDotJson.dependencies[key] ??= "*";
   });
-  return JSON.stringify(packageJson, null, 4);
+  return JSON.stringify(packageDotJson, null, 4);
 }

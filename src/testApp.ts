@@ -10,26 +10,6 @@ import {
 
 import puppeteer, { Browser, Page } from 'puppeteer';
 
-import fs from "fs-extra";
-
-const packageDotJsonData = fs.readFileSync('./app/package.json', 'utf8');
-
-let templateAppDirObj: any = null;
-let templateAppDir: string;
-
-export function setupTestEnvironment() {
-  // Create Temporary Folder/File Structure
-  console.log("Creating template app...");
-  ({ reactAppDirObj: templateAppDirObj, reactAppDir: templateAppDir } = createTemporaryFileSystem("/* */", packageDotJsonData));
-  console.log("Installing dependencies for template app...");
-  installReactDependencies(templateAppDir);
-}
-
-export function cleanupTestEnvironment() {
-  // Delete the Temporary Folder/File Structure.
-  deleteTemporaryDirectory(templateAppDirObj);
-}
-
 async function captureReactAppOutput(
   logErrorsOnly = true
 ): Promise<{ errors: string[]; screenshot: string | undefined }> {
@@ -69,14 +49,9 @@ async function captureReactAppOutput(
   return { errors: [...errorSet], screenshot };
 }
 
-export async function testReactApp(appDotJS: string, packageDotJSON: string) {
+export async function testReactApp() {
   // Create Temporary Folder/File Structure
-  const { reactAppDirObj, reactAppDir } = createTemporaryFileSystem(
-    appDotJS,
-    packageDotJSON
-  );
-  // Copy the node_modules from the template app to the new app.
-  fs.copySync(templateAppDir + "/node_modules", reactAppDir + "/node_modules");
+  const { reactAppDirObj, reactAppDir } = createTemporaryFileSystem();
 
   // Perform child_process in-sync opperations.
   try {
