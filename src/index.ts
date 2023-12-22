@@ -1,6 +1,6 @@
 import {
   testReactApp
-} from "./testApp";
+} from "./sandbox";
 
 (async () => {
   const result = await testReactApp();

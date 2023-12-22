@@ -116,18 +116,10 @@ export async function testReactApp() {
   // Delete the Temporary Folder/File Structure.
   deleteTemporaryDirectory(reactAppDirObj);
 
-  // Only save this React App data if it has an error.
   return {
     errors: reactAppErrors,
     screenshot: reactAppScreenshot,
     reactAppErrors: reactAppErrors,
     reactAppScreenshot: reactAppScreenshot,
   };
-
-  // TODO remove before deploy to production.
-  // if (count === 1) {
-  //     process.exit(0);
-  // } else {
-  //     count++;
-  // }
 }
