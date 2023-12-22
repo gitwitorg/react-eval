@@ -1,4 +1,3 @@
-//import { saveErrorInfo } from "./lib/firestore";
 import {
   testReactApp
 } from "./testApp";
