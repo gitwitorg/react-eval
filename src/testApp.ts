@@ -9,6 +9,10 @@ import {
 } from "./helpers/buildReactApp";
 
 import puppeteer, { Browser, Page } from 'puppeteer';
+import path from 'path';
+
+// Initialise env variables
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 async function captureReactAppOutput(
   logErrorsOnly = true
