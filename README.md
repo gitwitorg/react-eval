@@ -2,21 +2,16 @@
 
 ## Get started:
 
-If running macOS, specify the path to Chrome for Puppeteer:
+The React evaluation sandbox uses a custom E2B sandbox, which needs to be built before it can be used. Install the E2B CLI and authenticate:
 
 ```bash
-echo 'CHROME_BIN="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"\n' >> .env
+npm install -g @e2b/cli@latest
+e2b login
 ```
 
-Run:
+Build the sandbox:
 
 ```bash
-npm install
-npm start
+cd sandbox
+e2b build --name "react-evals"
 ```
-
-## Additional settings
-
-- PORT (optional): The port to test React apps on.
-- FIRESTORE_COLLECTION_NAME (optional): The collection to save results to.
-- SCREENSHOT (optional): If set, saves a Base64 encoded screenshot for each project.
