@@ -55,11 +55,14 @@ async function captureReactAppOutput(
 
 export async function testReactApp() {
   // Create Temporary Folder/File Structure
+  console.log("Copying React app to temporary directory...");
   const { reactAppDirObj, reactAppDir } = createTemporaryFileSystem();
 
   // Perform child_process in-sync opperations.
   try {
+    console.log("Clearing port 3000...");
     clearPortForReactAppLaunch(3000);
+    console.log("Installing React App Dependencies...")
     installReactDependencies(reactAppDir);
   } catch (error: any) {
     deleteTemporaryDirectory(reactAppDirObj);
