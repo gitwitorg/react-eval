@@ -1,0 +1,5 @@
+[
+    { "prompt": "add a div" },
+    { "prompt": "add a carousel" },
+    { "prompt": "add a button, when clicked, updates a chart" }
+]
