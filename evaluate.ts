@@ -34,13 +34,14 @@ async function runEvaluations(runNumber: string) {
     );
 
     // Build and evaluate the code
+    const timeout = 3 * 60 * 1000; // 3 minutes
     const procWithCustomHandler = await sandbox.process.start({
       cmd: "npm start",
       onStdout: (data) => console.log("process", data.line),
       onStderr: (data) => console.log("process", data.line),
-      timeout: 3 * 60 * 1000, // 3 minutes
+      timeout
     });
-    await procWithCustomHandler.wait();
+    await procWithCustomHandler.wait(timeout);
 
     // Save the results
     completedItems.push({
