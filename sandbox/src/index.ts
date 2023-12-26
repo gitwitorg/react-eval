@@ -11,7 +11,7 @@ import * as fs from "fs";
     fs.mkdirSync("./output");
   }
 
-  fs.writeFileSync("./output/errors.json", JSON.stringify({ errors: result?.errors }));
+  fs.writeFileSync("./output/errors.json", JSON.stringify( result?.errors ));
   if (result?.screenshot) {
     fs.writeFileSync("./output/screenshot.png", result?.screenshot);
   }
