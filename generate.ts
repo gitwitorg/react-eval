@@ -8,6 +8,7 @@ config();
 import { generateCode } from "gitwit-server";
 
 import { EvalItem, GenerationResult } from "./types";
+import { asyncMap } from "./utils";
 
 const appDotJS = fs.readFileSync("./sandbox/app/src/App.js", "utf-8");
 const packageDotJSON = fs.readFileSync("./sandbox/app/package.json", "utf-8");
@@ -48,7 +49,7 @@ async function runGenerations(dataset: string) {
 
   // Generate code for each prompt
   const processedItems: GenerationResult[] = [];
-  for (const item of items) {
+  asyncMap(items, 10, async (item : EvalItem) => {
     const { code: newAppDotJS, dependencies } = await generateCode(
       appDotJS,
       item.prompt
@@ -72,7 +73,7 @@ async function runGenerations(dataset: string) {
     console.log(
       `Generated (${processedItems.length}/${items.length}) ${item.prompt}`
     );
-  }
+  });
 }
 
 const dataset = process.argv[2];
