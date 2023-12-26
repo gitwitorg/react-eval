@@ -2,13 +2,17 @@ import {
   testReactApp
 } from "./sandbox";
 
+import * as fs from "fs";
+
 (async () => {
   const result = await testReactApp();
 
-  console.log({
-    errors: result?.reactAppErrors,
-    screenshot: result?.reactAppScreenshot,
-  });
+  if (!fs.existsSync("./output")) {
+    fs.mkdirSync("./output");
+  }
+
+  fs.writeFileSync("./output/errors.json", JSON.stringify({errors: result?.errors}));
+  fs.writeFileSync("./output/screenshot.png", result?.screenshot);
 
   // Exit node process with code success to avoid CRON automatic retrial
   process.exit(0);

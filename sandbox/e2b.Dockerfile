@@ -18,3 +18,6 @@ RUN echo "CHROME_BIN=/usr/bin/google-chrome" > .env
 # Pre-install the app dependencies to speed up the tests
 WORKDIR /evals/app
 RUN npm install
+
+# Allow the user "user" to write output files
+RUN chmod a+rwX /evals

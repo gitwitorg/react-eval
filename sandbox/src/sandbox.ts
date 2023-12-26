@@ -122,7 +122,5 @@ export async function testReactApp() {
   return {
     errors: reactAppErrors,
     screenshot: reactAppScreenshot,
-    reactAppErrors: reactAppErrors,
-    reactAppScreenshot: reactAppScreenshot,
   };
 }
