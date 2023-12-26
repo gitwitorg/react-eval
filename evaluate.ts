@@ -6,61 +6,87 @@ import { config } from "dotenv";
 config();
 
 import { GenerationResult, EvalResult } from "./types";
+import { asyncMap } from "./utils";
 
 const runsPath = path.join(__dirname, "runs");
 
-async function runEvaluations(runNumber: string) {
+// Return undefined if the file doesn't exist rather than throwing an error
+const safeReadBytes = async (sandbox: Sandbox, path: string) => {
+  try {
+    return await sandbox.filesystem.readBytes(path);
+  } catch (e) {
+    return undefined;
+  }
+};
 
+async function runEvaluations(runNumber: string) {
   // Read the generations file
-  const generations : GenerationResult[] = JSON.parse(
+  const generations: GenerationResult[] = JSON.parse(
     fs.readFileSync(path.join(runsPath, runNumber, "generations.json"), "utf8")
   );
   const completedItems: EvalResult[] = [];
 
-  // Evaluate code for each generation
-  for (const generation of generations) {
+  // Set up a logs directory for this run
+  const logsPath = path.join(runsPath, runNumber, "logs");
+  fs.mkdirSync(logsPath, { recursive: true });
 
+  // Evaluate code for each generation
+  asyncMap(generations, 10, async (generation: GenerationResult) => {
     // Create a custom sandbox with E2B
     const sandbox = await Sandbox.create({
       template: "react-evals",
-      cwd: "/evals"
+      cwd: "/evals",
     });
 
-    // Write the code to the sandbox
-    sandbox.filesystem.write("/evals/app/src/App.js", generation.appDotJS);
-    sandbox.filesystem.write(
-      "/evals/app/package.json",
-      generation.packageDotJSON
-    );
+    try {
+      const logFile = path.join(logsPath, `${generation.id}.log`);
+      fs.writeFileSync(logFile, "");
 
-    // Build and evaluate the code
-    const timeout = 3 * 60 * 1000; // 3 minutes
-    const procWithCustomHandler = await sandbox.process.start({
-      cmd: "npm start",
-      onStdout: (data) => console.log("process", data.line),
-      onStderr: (data) => console.log("process", data.line),
-      timeout
-    });
-    await procWithCustomHandler.wait(timeout);
+      // Write the code to the sandbox
+      sandbox.filesystem.write("/evals/app/src/App.js", generation.appDotJS);
+      sandbox.filesystem.write(
+        "/evals/app/package.json",
+        generation.packageDotJSON
+      );
 
-    // Save the results
-    const screenshot : Uint8Array = await sandbox.filesystem.readBytes("/evals/output/screenshot.png");
-    const errors = await sandbox.filesystem.read("/evals/output/errors.json");
-    completedItems.push({ ...generation, errors });
-    fs.mkdirSync(path.join(runsPath, runNumber, `screenshots`), { recursive: true });
-    fs.writeFileSync(
-      path.join(runsPath, runNumber, `screenshots/${generation.id}.png`),
-      screenshot
-    );
-    console.log("Completed evaluation for", generation.id);
-    fs.writeFileSync(
-      path.join(runsPath, runNumber, "evaluations.json"),
-      JSON.stringify(completedItems, null, 2)
-    );
+      // Build and evaluate the code
+      const timeout = 3 * 60 * 1000; // 3 minutes
+      const procWithCustomHandler = await sandbox.process.start({
+        cmd: "npm start",
+        onStdout: (data) =>
+          fs.appendFile(logFile, `[STDOUT] ${data.line}\n`, () => {}),
+        onStderr: (data) =>
+          fs.appendFile(logFile, `[STDERR] ${data.line}\n`, () => {}),
+        timeout,
+      });
+      await procWithCustomHandler.wait(timeout);
 
-    // Close the sandbox
-    await sandbox.close();
-  }
+      // Save the results
+      const errors = await sandbox.filesystem.read("/evals/output/errors.json");
+      completedItems.push({ ...generation, errors });
+      fs.writeFileSync(
+        path.join(runsPath, runNumber, "evaluations.json"),
+        JSON.stringify(completedItems, null, 2)
+      );
+
+      // Save the screenshot
+      let screenshot: Uint8Array | undefined = await safeReadBytes(sandbox, "/evals/output/screenshot.png");
+      if (screenshot) {
+        const screenshotsPath = path.join(runsPath, runNumber, `screenshots`);
+        fs.mkdirSync(screenshotsPath, { recursive: true });
+        fs.writeFileSync(
+          path.join(screenshotsPath, `${generation.id}.png`),
+          screenshot
+        );
+      }
+
+      console.log("Completed evaluation for", generation.id);
+    } catch (e) {
+      console.error("Error evaluating", generation.id, e);
+    } finally {
+      await sandbox.close();
+    }
+  });
 }
 
 const runNumber = process.argv[2];
