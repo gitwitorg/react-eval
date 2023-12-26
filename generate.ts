@@ -5,6 +5,8 @@ import * as path from "path";
 import { config } from "dotenv";
 config();
 
+const evalConfig = require('./config.json');
+
 import { generateCode } from "gitwit-server";
 
 import { EvalItem, GenerationResult } from "./types";
@@ -30,6 +32,10 @@ const addDependencies = (
   return packageDotJSONData;
 };
 
+function repeatArray(arr: any[], n: number): any[] {
+  return Array.from({ length: n }, () => [...arr]).flat();
+}
+
 // Generate code for each prompt
 async function runGenerations(dataset: string) {
 
@@ -45,11 +51,11 @@ async function runGenerations(dataset: string) {
   // Read the evals file
   const filePath = path.join(evalsPath, `${dataset}.json`);
   const data = fs.readFileSync(filePath, "utf8");
-  const items: EvalItem[] = JSON.parse(data);
+  const items: EvalItem[] = repeatArray(JSON.parse(data), evalConfig.n_generations || 1);
 
   // Generate code for each prompt
   const processedItems: GenerationResult[] = [];
-  asyncMap(items, 10, async (item : EvalItem) => {
+  asyncMap(items, evalConfig.max_concurrent_generations || 1, async (item : EvalItem) => {
     const { code: newAppDotJS, dependencies } = await generateCode(
       appDotJS,
       item.prompt

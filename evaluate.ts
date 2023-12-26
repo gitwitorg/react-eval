@@ -5,6 +5,8 @@ import * as path from "path";
 import { config } from "dotenv";
 config();
 
+const evalConfig = require('./config.json');
+
 import { GenerationResult, EvalResult } from "./types";
 import { asyncMap } from "./utils";
 
@@ -34,7 +36,7 @@ async function runEvaluations(runNumber: string) {
   fs.mkdirSync(logsPath, { recursive: true });
 
   // Evaluate code for each generation
-  asyncMap(generations, 10, async (generation: GenerationResult) => {
+  asyncMap(generations, evalConfig.max_concurrent_evaluations || 1, async (generation: GenerationResult) => {
     // Create a custom sandbox with E2B
     const sandbox = await Sandbox.create({
       template: "react-evals",
