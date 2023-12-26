@@ -67,13 +67,13 @@ async function runEvaluations(runNumber: string) {
       const processOutput = await procWithCustomHandler.wait(timeout);
 
       // Save the results
-      const errors = await safeRead(
+      const errorJSON = await safeRead(
         sandbox.filesystem.read,
         "/evals/output/errors.json"
       );
       completedItems.push({
         ...generation,
-        errors,
+        errors: errorJSON ? JSON.parse(errorJSON) : undefined,
         exitCode: processOutput.exitCode
       });
       fs.writeFileSync(
