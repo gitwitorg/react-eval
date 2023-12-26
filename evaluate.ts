@@ -11,9 +11,12 @@ import { asyncMap } from "./utils";
 const runsPath = path.join(__dirname, "runs");
 
 // Return undefined if the file doesn't exist rather than throwing an error
-const safeReadBytes = async (sandbox: Sandbox, path: string) => {
+const safeRead = async <T>(
+  readBytesFunction: (path: string) => Promise<T>,
+  path: string
+): Promise<T | undefined> => {
   try {
-    return await sandbox.filesystem.readBytes(path);
+    return await readBytesFunction(path);
   } catch (e) {
     return undefined;
   }
@@ -59,18 +62,28 @@ async function runEvaluations(runNumber: string) {
           fs.appendFile(logFile, `[STDERR] ${data.line}\n`, () => {}),
         timeout,
       });
-      await procWithCustomHandler.wait(timeout);
+      const processOutput = await procWithCustomHandler.wait(timeout);
 
       // Save the results
-      const errors = await sandbox.filesystem.read("/evals/output/errors.json");
-      completedItems.push({ ...generation, errors });
+      const errors = await safeRead(
+        sandbox.filesystem.read,
+        "/evals/output/errors.json"
+      );
+      completedItems.push({
+        ...generation,
+        errors,
+        exitCode: processOutput.exitCode
+      });
       fs.writeFileSync(
         path.join(runsPath, runNumber, "evaluations.json"),
-        JSON.stringify(completedItems, null, 2)
+        JSON.stringify(completedItems, null, 2),
       );
 
       // Save the screenshot
-      let screenshot: Uint8Array | undefined = await safeReadBytes(sandbox, "/evals/output/screenshot.png");
+      let screenshot: Uint8Array | undefined = await safeRead(
+        sandbox.filesystem.readBytes,
+        "/evals/output/screenshot.png"
+      );
       if (screenshot) {
         const screenshotsPath = path.join(runsPath, runNumber, `screenshots`);
         fs.mkdirSync(screenshotsPath, { recursive: true });

@@ -10,5 +10,6 @@ export type GenerationResult = EvalItem & {
 };
 
 export type EvalResult = GenerationResult & {
-  errors: string;
+  errors?: string;
+  exitCode?: number;
 }
