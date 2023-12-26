@@ -11,8 +11,10 @@ import * as fs from "fs";
     fs.mkdirSync("./output");
   }
 
-  fs.writeFileSync("./output/errors.json", JSON.stringify({errors: result?.errors}));
-  fs.writeFileSync("./output/screenshot.png", result?.screenshot);
+  fs.writeFileSync("./output/errors.json", JSON.stringify({ errors: result?.errors }));
+  if (result?.screenshot) {
+    fs.writeFileSync("./output/screenshot.png", result?.screenshot);
+  }
 
   // Exit node process with code success to avoid CRON automatic retrial
   process.exit(0);

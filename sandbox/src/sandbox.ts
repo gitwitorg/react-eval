@@ -16,7 +16,7 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 async function captureReactAppOutput(
   logErrorsOnly = true
-): Promise<{ errors: string[]; screenshot: string | undefined }> {
+): Promise<{ errors: string[]; screenshot: Buffer }> {
   const errorSet = new Set<string>();
   const browser: Browser = await puppeteer.launch({
     headless: true,
@@ -43,7 +43,7 @@ async function captureReactAppOutput(
   await page.goto("http://localhost:3000", { waitUntil: "load" });
 
   // Capture a screenshot
-  const screenshot = await page.screenshot({ encoding: "base64" });
+  const screenshot = await page.screenshot({ encoding: "binary" });
 
   await browser.close();
 

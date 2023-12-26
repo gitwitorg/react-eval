@@ -44,15 +44,14 @@ async function runEvaluations(runNumber: string) {
     await procWithCustomHandler.wait(timeout);
 
     // Save the results
-    completedItems.push({
-      id: generation.id,
-      prompt: generation.prompt,
-      created: generation.created,
-      appDotJS: generation.appDotJS,
-      packageDotJSON: generation.packageDotJSON,
-      screenshot: await sandbox.filesystem.read("/evals/output/screenshot.png"),
-      errors: await sandbox.filesystem.read("/evals/output/errors.json"),
-    });
+    const screenshot : Uint8Array = await sandbox.filesystem.readBytes("/evals/output/screenshot.png");
+    const errors = await sandbox.filesystem.read("/evals/output/errors.json");
+    completedItems.push({ ...generation, errors });
+    fs.mkdirSync(path.join(runsPath, runNumber, `screenshots`), { recursive: true });
+    fs.writeFileSync(
+      path.join(runsPath, runNumber, `screenshots/${generation.id}.png`),
+      screenshot
+    );
     console.log("Completed evaluation for", generation.id);
     fs.writeFileSync(
       path.join(runsPath, runNumber, "evaluations.json"),
