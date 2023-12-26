@@ -25,7 +25,7 @@ export function installReactDependencies(reactAppPath: string): void {
     try {
         console.log('Installing react dependencies...');
 
-        execSync(`cd ${reactAppPath} && npm install`, { stdio: 'inherit' });
+        execSync(`cd ${reactAppPath} && npm install --legacy-peer-deps`, { stdio: 'inherit' });
 
         console.log('Installation completed.');
     } catch (error) {
