@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Items List</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+  <div class="container mx-auto py-8 px-8">
+    <h1 class="text-lg mb-8 text-center">
+      <%= results.length %> Results
+    </h1>
+    <div class="flex flex-wrap justify-center">
+      <% results.forEach(function(item) { %>
+        <div class="bg-white flex flex-col items-center justify-center m-1">
+          <% if (item.screenshot) { %>
+          <img src="./screenshots/<%= item.id %>.png" alt="<%= item.prompt %>" class="w-24 h-24 rounded-sm border">
+          <% } else { %>
+              <div class="w-24 h-24 rounded-sm border bg-gray-100 flex justify-center items-center">
+                😵
+              </div>
+          <% } %>
+        </div>
+        <% }); %>
+    </div>
+  <table class="min-w-full text-sm mt-8">
+    <thead>
+      <tr>
+        <th class="text-left">ID</th>
+        <th class="text-left">Prompt</th>
+        <th class="text-left">Errors</th>
+        <th class="text-left">Exit Code</th>
+        <th class="text-left">LOC</th>
+        <th class="text-left">Deps</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% results.forEach(function(result) { %>
+        <tr>
+          <td class="border px-4 py-2">
+            <%= result.id.split("-")[0] %>
+          </td>
+          <td class="border px-4 py-2">
+            <%= result.prompt %>
+          </td>
+          <td class="border px-4 py-2">
+            <% result.errors?.length %>
+          </td>
+          <td class="border px-4 py-2">
+            <%= result.exitCode %>
+          </td>
+          <td class="border px-4 py-2">
+            <%= result.appDotJS.split("\n").length %>
+          </td>
+          <td class="border px-4 py-2">
+            <%= Object.keys(result.dependencies).length %>
+        </tr>
+        <% }); %>
+    </tbody>
+  </table>
+</div>
+</body>
+
+</html>
