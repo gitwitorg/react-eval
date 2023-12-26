@@ -8,3 +8,8 @@ export type GenerationResult = EvalItem & {
   appDotJS: string;
   packageDotJSON: string;
 };
+
+export type EvalResult = GenerationResult & {
+  screenshot: string;
+  errors: string;
+}
