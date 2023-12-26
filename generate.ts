@@ -32,11 +32,6 @@ const addDependencies = (
 // Generate code for each prompt
 async function runGenerations(dataset: string) {
 
-  // Create the runs directory if it doesn't exist
-  if (!fs.existsSync(runsPath)) {
-    fs.mkdirSync(runsPath);
-  }
-
   // Create new directory for this run
   const maxNumber = fs
     .readdirSync(runsPath)
@@ -44,7 +39,7 @@ async function runGenerations(dataset: string) {
     .reduce((max, dir) => Math.max(max, parseInt(dir)), 0);
   const newNumber = maxNumber + 1;
   const newDir = path.join(runsPath, newNumber.toString());
-  fs.mkdirSync(newDir);
+  fs.mkdirSync(newDir, { recursive: true });
 
   // Read the evals file
   const filePath = path.join(evalsPath, `${dataset}.json`);
