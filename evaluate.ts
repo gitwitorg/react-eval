@@ -55,16 +55,14 @@ async function runEvaluations(runNumber: string) {
       );
 
       // Build and evaluate the code
-      const timeout = 3 * 60 * 1000; // 3 minutes
       const procWithCustomHandler = await sandbox.process.start({
         cmd: "npm start",
         onStdout: (data) =>
           fs.appendFile(logFile, `[STDOUT] ${data.line}\n`, () => {}),
         onStderr: (data) =>
-          fs.appendFile(logFile, `[STDERR] ${data.line}\n`, () => {}),
-        timeout,
+          fs.appendFile(logFile, `[STDERR] ${data.line}\n`, () => {})
       });
-      const processOutput = await procWithCustomHandler.wait(timeout);
+      const processOutput = await procWithCustomHandler.wait((evalConfig.sandbox_timeout || 60) * 1000);
 
       // Save the results
       const errorJSON = await safeRead(
