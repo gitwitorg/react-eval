@@ -23,6 +23,50 @@
       text-indent: 0;
       flex: 1;
     }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 50px auto 0px;
+      padding: 0px 20px 20px;
+      border-radius: 5px;
+      border: 1px solid #888;
+      width: 80%;
+      height: 80%;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+      overflow: auto;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* Style for the code textarea */
+    .codeblock {
+      width: 100%;
+      height: 100%;
+    }
   </style>
 </head>
 
@@ -93,17 +137,18 @@
               </td>
               <td class="border-y px-2 py-2">
                 <%= Object.keys(result.dependencies).length %>
+              </td>
             </tr>
             <tr class="detail">
               <td colspan="7">
                 <div style="display: flex;">
-                  <div class="codeblock">
+                  <div class="appDotJS codeblock">
                     <%= result.appDotJS %>
                   </div>
-                  <div class="codeblock">
+                  <div class="packageDotJSON codeblock">
                     <%= result.packageDotJSON %>
                   </div>
-                  <div class="codeblock">
+                  <div class="log codeblock">
                     <%= result.log %>
                   </div>
                 </div>
@@ -115,22 +160,61 @@
       <% }); %>
   </div>
 
+  <!-- Modal Dialog -->
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div class="modal-body">
+        <h3 class="text-md mt-4 font-bold">App.js</h3>
+        <div id="appDotJS" class="codeblock"></div>
+        <h3 class="text-md mt-4 font-bold">package.json</h3>
+        <div id="packageDotJSON" class="codeblock"></div>
+        <h3 class="text-md mt-4 font-bold">Log</h3>
+        <div id="log" class="codeblock"></div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const rows = document.querySelectorAll('tbody tr[data-index]');
     rows.forEach(row => {
       row.addEventListener('click', () => {
         const detailRow = row.nextElementSibling;
-        detailRow.classList.toggle('open');
+        const appDotJS = document.getElementById('appDotJS');
+        appDotJS.innerText = detailRow.querySelector('.appDotJS.codeblock').textContent.replace(/^\s+|\s+$/, '');
+        const packageDotJSON = document.getElementById('packageDotJSON');
+        packageDotJSON.innerText = detailRow.querySelector('.packageDotJSON.codeblock').textContent.replace(/^\s+|\s+$/, '');
+        const log = document.getElementById('log');
+        log.innerText = detailRow.querySelector('.log.codeblock').textContent.replace(/^\s+|\s+$/, '');
+        modal.style.display = 'block';
       });
     });
-    document.addEventListener('DOMContentLoaded', function () {
-      var preElements = document.querySelectorAll('.codeblock');
-      preElements.forEach(function (preElement) {
-        preElement.innerHTML = preElement.innerHTML.replace(/^\s+/, '');
-      });
+
+    // Get the modal element
+    const modal = document.getElementById('myModal');
+
+    // Get the <span> element that closes the modal
+    const closeModal = document.querySelector('.close');
+
+    // Close the modal when the close button is clicked
+    closeModal.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' || event.keyCode === 27) {
+        modal.style.display = 'none';
+      }
+    });
+
+    // Close the modal when clicking outside of it
+    window.addEventListener('click', event => {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
     });
   </script>
-
 </body>
 
 </html>
