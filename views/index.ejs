@@ -94,6 +94,11 @@
             <%= Math.round(100 * results.filter((r)=> r.score).length / results.length) %>%
           </td>
         </tr>
+        <tr class="bg-gray-50">
+          <td class="border-y px-2 py-2 font-bold">Average LOC:</td>
+          <td class="border-y px-2 py-2">
+            <%= Math.round(results.reduce((acc, r) => acc + r.appDotJS.split("\n").length, 0) / results.length) %>
+          </td>
       </tbody>
     </table>
     <% Object.keys(groups).forEach(function(prompt) { const allResults=groups[prompt]; %>
@@ -123,7 +128,7 @@
         <thead>
           <tr>
             <th class="text-left">ID</th>
-            <th class="text-left">JS Errors</th>
+            <th class="text-left">Errors</th>
             <th class="text-left">Exit Code</th>
             <th class="text-left">LOC</th>
             <th class="text-left">Chars/LOC</th>
@@ -141,6 +146,11 @@
                 <% if (result.errors && result.errors.length) { %>
                   <div class="px-2 py-1 inline-block rounded-sm bg-gray-200">
                     <%- result.errors.join("<br />") %>
+                  </div>
+                  <% } %>
+                <% if (result.exitCode !== 0) { %>
+                  <div class="px-2 py-1 inline-block rounded-sm bg-gray-200">
+                    <%- result.log.match(/^\[STDERR\](.*)/mg)?.[0] %>
                   </div>
                   <% } %>
               </td>
