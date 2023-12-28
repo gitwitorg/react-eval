@@ -9,19 +9,34 @@ import { EvalResult } from "./types";
 
 const runsPath = path.join(__dirname, "runs");
 
+function arrayToDict(arr: any[], groupingKey: string): { [key: string]: any[] } {
+  const dict: { [key: string]: any[] } = {};
+  for (const item of arr) {
+    const key = item[groupingKey];
+    if (dict[key]) {
+      dict[key].push(item);
+    } else {
+      dict[key] = [item];
+    }
+  }
+  return dict;
+}
+
 async function viewResults(runNumber: string) {
   // Read the generations file
-  const results: any[] = JSON.parse(
+  const results = JSON.parse(
     fs.readFileSync(path.join(runsPath, runNumber, "evaluations.json"), "utf8")
   ).map((result: EvalResult) => ({
     ...result,
     dependencies: JSON.parse(result.packageDotJSON).dependencies,
-    screenshot: fs.existsSync(path.join(runsPath, runNumber, "screenshots", `${result.id}.png`))
+    screenshot: fs.existsSync(path.join(runsPath, runNumber, "screenshots", `${result.id}.png`)),
+    log: fs.readFileSync(path.join(runsPath, runNumber, "logs", `${result.id}.log`), "utf8"),
   }));
+  const groups = arrayToDict(results, "prompt");
 
   const renderedHTML = ejs.render(
     fs.readFileSync(path.join(__dirname, "views", "index.ejs"), "utf-8"),
-    { results }
+    { groups, results }
   );
 
   const outputPath = path.join(runsPath, runNumber, "index.html");

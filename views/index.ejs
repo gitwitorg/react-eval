@@ -4,71 +4,133 @@
 <head>
   <title>Items List</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .detail {
+      display: none;
+    }
+
+    .open {
+      display: table-row;
+    }
+
+    .codeblock {
+      white-space: pre-wrap;
+      padding: 10px;
+      border: 1px solid #ccc;
+      height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      text-indent: 0;
+      flex: 1;
+    }
+  </style>
 </head>
 
 <body>
   <div class="container mx-auto py-8 px-8">
-    <h1 class="text-lg mb-8 text-center">
-      <%= results.length %> Results
+    <h1 class="text-2xl mb-8 text-center">
+      Results
     </h1>
-    <div class="flex flex-wrap justify-center">
-      <% results.forEach(function(item) { %>
-        <div class="bg-white flex flex-col items-center justify-center m-1">
-          <% if (item.screenshot) { %>
-            <a href="./screenshots/<%= item.id %>.png" target="_blank" rel="noopener noreferrer">
-              <img src="./screenshots/<%= item.id %>.png" alt="<%= item.prompt %>" class="w-24 h-24 rounded-sm border">
-            </a>
-            <% } else { %>
-              <div class="w-24 h-24 rounded-sm border bg-gray-100 flex justify-center items-center">
-                😵
-              </div>
-              <% } %>
-        </div>
-        <% }); %>
-    </div>
-    <table class="min-w-full text-sm mt-8">
-      <thead>
-        <tr>
-          <th class="text-left">ID</th>
-          <th class="text-left">Prompt</th>
-          <th class="text-left">Errors</th>
-          <th class="text-left">Exit Code</th>
-          <th class="text-left">LOC</th>
-          <th class="text-left">Chars/LOC</th>
-          <th class="text-left">Deps</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% results.forEach(function(result) { %>
-          <tr class="bg-gray-50">
-            <td class="border-y px-2 py-2">
-              <%= result.id.split("-")[0] %>
-            </td>
-            <td class="border-y px-2 py-2">
-              <%= result.prompt %>
-            </td>
-            <td class="border-y px-2 py-2">
-              <% result.errors?.length %>
-            </td>
-            <td class="border-y px-2 py-2">
-              <div
-                class="px-2 py-1 inline-block rounded-sm <%= result.exitCode === 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white' %>">
-                <%= result.exitCode %>
-              </div>
-            </td>
-            <td class="border-y px-2 py-2">
-              <%= result.appDotJS.split("\n").length %>
-            </td>
-            <td class="border-y px-2 py-2">
-              <%= Math.round(result.appDotJS.length / result.appDotJS.split("\n").length) %>
-            </td>
-            <td class="border-y px-2 py-2">
-              <%= Object.keys(result.dependencies).length %>
-          </tr>
+    <% Object.keys(groups).forEach(function(prompt) { const allResults=groups[prompt]; %>
+      <h2 class="text-lg mb-8 text-center mt-12">
+        <strong>
+          <%= allResults.length %> Results
+        </strong><br />
+        <%= prompt %>
+      </h2>
+      <div class="flex flex-wrap justify-center w-full">
+        <% allResults.forEach(function(item) { %>
+          <div class="bg-white flex flex-col items-center justify-center m-1">
+            <% if (item.screenshot) { %>
+              <a href="./screenshots/<%= item.id %>.png" target="_blank" rel="noopener noreferrer">
+                <img src="./screenshots/<%= item.id %>.png" alt="<%= item.prompt %>"
+                  class="w-24 h-24 rounded-sm border">
+              </a>
+              <% } else { %>
+                <div class="w-24 h-24 rounded-sm border bg-gray-100 flex justify-center items-center">
+                  😵
+                </div>
+                <% } %>
+          </div>
           <% }); %>
-      </tbody>
-    </table>
+      </div>
+      <table class="min-w-full text-sm mt-8">
+        <thead>
+          <tr>
+            <th class="text-left">ID</th>
+            <th class="text-left">JS Errors</th>
+            <th class="text-left">Exit Code</th>
+            <th class="text-left">LOC</th>
+            <th class="text-left">Chars/LOC</th>
+            <th class="text-left">Deps</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% allResults.forEach(function(result) { %>
+            <tr class="bg-gray-50" data-index="<%= result.id %>">
+              <td class="border-y px-2 py-2">
+                <%= result.id.split("-")[0] %>
+              </td>
+              <td class="border-y px-2 py-2">
+                <% if (result.errors) { %>
+                  <div
+                    class="px-2 py-1 inline-block rounded-sm <%= result.errors.length === 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white' %>">
+                    <%= result.errors.length %>
+                  </div>
+                  <% } %>
+              </td>
+              <td class="border-y px-2 py-2">
+                <div
+                  class="px-2 py-1 inline-block rounded-sm <%= result.exitCode === 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white' %>">
+                  <%= result.exitCode %>
+                </div>
+              </td>
+              <td class="border-y px-2 py-2">
+                <%= result.appDotJS.split("\n").length %>
+              </td>
+              <td class="border-y px-2 py-2">
+                <%= Math.round(result.appDotJS.length / result.appDotJS.split("\n").length) %>
+              </td>
+              <td class="border-y px-2 py-2">
+                <%= Object.keys(result.dependencies).length %>
+            </tr>
+            <tr class="detail">
+              <td colspan="7">
+                <div style="display: flex;">
+                  <div class="codeblock">
+                    <%= result.appDotJS %>
+                  </div>
+                  <div class="codeblock">
+                    <%= result.packageDotJSON %>
+                  </div>
+                  <div class="codeblock">
+                    <%= result.log %>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <% }); %>
+        </tbody>
+      </table>
+      <% }); %>
   </div>
+
+  <script>
+    const rows = document.querySelectorAll('tbody tr[data-index]');
+    rows.forEach(row => {
+      row.addEventListener('click', () => {
+        const detailRow = row.nextElementSibling;
+        detailRow.classList.toggle('open');
+      });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      var preElements = document.querySelectorAll('.codeblock');
+      preElements.forEach(function (preElement) {
+        preElement.innerHTML = preElement.innerHTML.replace(/^\s+/, '');
+      });
+    });
+  </script>
+
 </body>
 
 </html>
