@@ -117,7 +117,12 @@ export async function testReactApp() {
   await new Promise((r) => setTimeout(r, 1000));
 
   // Delete the Temporary Folder/File Structure.
-  deleteTemporaryDirectory(reactAppDirObj);
+  try {
+    console.log("Deleting temporary directory...");
+    deleteTemporaryDirectory(reactAppDirObj);
+  } catch (error: any) {
+    console.error(error);
+  }
 
   return {
     errors: reactAppErrors,
