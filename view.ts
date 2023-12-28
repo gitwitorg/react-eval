@@ -31,6 +31,7 @@ async function viewResults(runNumber: string) {
     dependencies: JSON.parse(result.packageDotJSON).dependencies,
     screenshot: fs.existsSync(path.join(runsPath, runNumber, "screenshots", `${result.id}.png`)),
     log: fs.readFileSync(path.join(runsPath, runNumber, "logs", `${result.id}.log`), "utf8"),
+    score: result.exitCode === 0 && result.errors?.length === 0
   }));
   const groups = arrayToDict(results, "prompt");
 
