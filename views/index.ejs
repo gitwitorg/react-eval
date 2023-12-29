@@ -101,7 +101,7 @@
           </td>
       </tbody>
     </table>
-    <% Object.keys(groups).forEach(function(prompt) { const allResults=groups[prompt]; %>
+    <% Object.keys(groups).sort().forEach(function(prompt) { const allResults=groups[prompt]; %>
       <h2 class="text-lg mb-8 text-center mt-12">
         <strong>
           <%= prompt %>
