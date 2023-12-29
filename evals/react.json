@@ -1,5 +1,10 @@
 [
-    { "prompt": "add a div" },
-    { "prompt": "add a carousel" },
-    { "prompt": "add a button, when clicked, updates a chart" }
+    { "prompt": "add a button" },
+    { "prompt": "create a login form" },
+    { "prompt": "make a personal website with three pages" },
+    { "prompt": "add a button, when clicked opens a modal" },
+    { "prompt": "make a set of introductory screens, which the user can swipe through one by one" },
+    { "prompt": "create a magic eight ball that, when shaken, gives a prediction" },
+    { "prompt": "create an editable kanban board" },
+    { "prompt": "create a page showing a map with several markers on the left side, and the list of marked locations on the right side" }
 ]
