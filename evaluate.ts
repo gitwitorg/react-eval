@@ -37,11 +37,18 @@ async function runEvaluations(runNumber: string) {
 
   // Evaluate code for each generation
   asyncMap(generations, evalConfig.max_concurrent_evaluations || 1, async (generation: GenerationResult) => {
+
     // Create a custom sandbox with E2B
-    const sandbox = await Sandbox.create({
-      template: "react-evals",
-      cwd: "/evals",
-    });
+    let sandbox : Sandbox | null = null;
+    try {
+      sandbox = await Sandbox.create({
+        template: "react-evals",
+        cwd: "/evals",
+      });
+    } catch (e) {
+      console.error("Error creating sandbox", e);
+      return;
+    }
 
     try {
       const logFile = path.join(logsPath, `${generation.id}.log`);
@@ -97,7 +104,9 @@ async function runEvaluations(runNumber: string) {
     } catch (e) {
       console.error("Error evaluating", generation.id, e);
     } finally {
-      await sandbox.close();
+      if (sandbox) {
+        await sandbox.close();
+      }
     }
   });
 }
