@@ -36,7 +36,9 @@ async function runEvaluations(runNumber: string) {
   fs.mkdirSync(logsPath, { recursive: true });
 
   // Evaluate code for each generation
-  asyncMap(generations, evalConfig.max_concurrent_evaluations || 1, async (generation: GenerationResult) => {
+  const startTime = Date.now();
+  let evaluationDurations: number[] = [];
+  await asyncMap(generations, evalConfig.max_concurrent_evaluations || 1, async (generation: GenerationResult) => {
 
     // Create a custom sandbox with E2B
     let sandbox : Sandbox | null = null;
@@ -51,6 +53,7 @@ async function runEvaluations(runNumber: string) {
     }
 
     try {
+      const evaluationStartTime = Date.now();
       const logFile = path.join(logsPath, `${generation.id}.log`);
       fs.writeFileSync(logFile, "");
 
@@ -100,7 +103,9 @@ async function runEvaluations(runNumber: string) {
         );
       }
 
-      console.log("Completed evaluation for", generation.id);
+      const duration = (Date.now() - evaluationStartTime) / 1000;
+      evaluationDurations.push(duration);
+      console.log(`Evaluated ${generation.id} in ${duration.toFixed(0)}s (${completedItems.length}/${generations.length})`);
     } catch (e) {
       console.error("Error evaluating", generation.id, e);
     } finally {
@@ -109,6 +114,10 @@ async function runEvaluations(runNumber: string) {
       }
     }
   });
+
+  const duration = (Date.now() - startTime) / 1000;
+  const average = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
+  console.log(`Finished evaluating ${completedItems.length} generations in ${duration.toFixed(0)}s (Avg. ${average(evaluationDurations)}s)`);
 }
 
 const runNumber = process.argv[2];
