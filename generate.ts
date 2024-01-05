@@ -46,16 +46,22 @@ async function runGenerations(dataset: string) {
     .reduce((max, dir) => Math.max(max, parseInt(dir)), 0);
   const newNumber = maxNumber + 1;
   const newDir = path.join(runsPath, newNumber.toString());
-  fs.mkdirSync(newDir, { recursive: true });
 
   // Read the evals file
   const filePath = path.join(evalsPath, `${dataset}.json`);
   const data = fs.readFileSync(filePath, "utf8");
   const items: EvalItem[] = repeatArray(JSON.parse(data), evalConfig.n_generations || 1);
 
+  // Confirm with the user
+  console.log(`Press return to start ${items.length} generations.`);
+  const stdin = process.openStdin();
+  await new Promise((resolve) => stdin.once("data", resolve));
+  console.log("Generating...")
+
   // Generate code for each prompt
+  fs.mkdirSync(newDir, { recursive: true });
   const processedItems: GenerationResult[] = [];
-  asyncMap(items, evalConfig.max_concurrent_generations || 1, async (item : EvalItem) => {
+  await asyncMap(items, evalConfig.max_concurrent_generations || 1, async (item : EvalItem) => {
     const { code: newAppDotJS, dependencies } = await generateCode(
       appDotJS,
       item.prompt
@@ -80,6 +86,8 @@ async function runGenerations(dataset: string) {
       `Generated (${processedItems.length}/${items.length}) ${item.prompt}`
     );
   });
+
+  process.exit(0);
 }
 
 const dataset = process.argv[2];
