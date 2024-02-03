@@ -5,7 +5,7 @@
 This is a framework for measuring the effectiveness of LLMs and/or AI agents on generating ReactJS code.
 
 The main features are:
-- Batch code generation using OpenAI
+- Batch code generation using an LLM or AI agent
 - Batch ReactJS compilation and end-to-end testing using cloud sandboxes
 - Quick visualization of evaluation results
 
@@ -36,6 +36,12 @@ e2b build --name "react-evals"
 ```
 
 Once these steps are finished, you can go on to the instructions below.
+
+## Using with GitWit
+
+If you want to use with GitWit, clone [gitwit-server](https://github.com/gitwitorg/gitwit-server) in another directory. In the `gitwit-server` directory, run `yarn link`. Then, in the `react-eval` directory run `yarn install gitwit-server`.
+
+For GitWit to work, you'll also need to add `AZURE_API_KEY` to your `.env`.
 
 ## Usage
 
