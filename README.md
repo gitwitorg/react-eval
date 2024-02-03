@@ -1,5 +1,18 @@
 # React Codegen Evaluation
 
+## What is this for?
+
+This is a framework for measuring the effectiveness of LLMs and/or AI agents on generating ReactJS code.
+
+The main features are:
+- Batch code generation using OpenAI
+- Batch ReactJS compilation and end-to-end testing using cloud sandboxes
+- Quick visualization of evaluation results
+
+You're welcome to use this framework with your own code generation tool. By default it works with [GitWit core](https://github.com/gitwitorg/gitwit-server).
+
+<img src="https://github.com/gitwitorg/react-eval/assets/33395784/63e918f4-034a-4b64-9d7b-1daa750eff2a" width="700" />
+
 ## Getting started
 
 The React evaluation sandbox uses a custom E2B sandbox, which needs to be built before it can be used. This requires E2B's Pro tier. Install the E2B CLI and authenticate:
