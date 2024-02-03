@@ -22,6 +22,8 @@ cd sandbox
 e2b build --name "react-evals"
 ```
 
+Once these steps are finished, you can go on to the instructions below.
+
 ## Usage
 
 **1. Create an evaluation set**
