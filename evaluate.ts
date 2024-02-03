@@ -49,7 +49,7 @@ async function runEvaluations(runNumber: string) {
       });
     } catch (e) {
       console.error("Error creating sandbox", e);
-      return;
+      throw e;
     }
 
     try {
