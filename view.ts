@@ -1,6 +1,7 @@
 import * as ejs from "ejs";
 import * as fs from "fs";
 import * as path from "path";
+import { exec } from 'child_process';
 
 import { config } from "dotenv";
 config();
@@ -43,6 +44,7 @@ async function viewResults(runNumber: string) {
   const outputPath = path.join(runsPath, runNumber, "index.html");
   fs.writeFileSync(outputPath, renderedHTML);
   console.log(`Wrote results to ${outputPath}.`);
+  exec(`open ${outputPath}`);
 }
 
 const runNumber = process.argv[2];
