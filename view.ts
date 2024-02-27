@@ -8,7 +8,8 @@ config();
 
 import { EvalResult } from "./types";
 
-const runsPath = path.join(__dirname, "runs");
+const runsPath = "./runs"
+const viewsPath = "./views"
 
 function arrayToDict(arr: any[], groupingKey: string): { [key: string]: any[] } {
   const dict: { [key: string]: any[] } = {};
@@ -37,7 +38,7 @@ async function viewResults(runNumber: string) {
   const groups = arrayToDict(results, "prompt");
 
   const renderedHTML = ejs.render(
-    fs.readFileSync(path.join(__dirname, "views", "index.ejs"), "utf-8"),
+    fs.readFileSync(path.join(viewsPath, "index.ejs"), "utf-8"),
     { groups, results }
   );
 

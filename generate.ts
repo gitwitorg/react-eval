@@ -5,7 +5,7 @@ import * as path from "path";
 import { config } from "dotenv";
 config();
 
-const evalConfig = require('./config.json');
+import evalConfig from "./config.json";
 
 import { generateCode } from "gitwit-server";
 
@@ -15,8 +15,8 @@ import { asyncMap } from "./utils";
 const appDotJS = fs.readFileSync("./sandbox/app/src/App.js", "utf-8");
 const packageDotJSON = fs.readFileSync("./sandbox/app/package.json", "utf-8");
 
-const runsPath = path.join(__dirname, "runs");
-const evalsPath = path.join(__dirname, "evals");
+const runsPath = "./runs"
+const evalsPath = "./evals"
 
 // Add dependencies to package.json
 const addDependencies = (

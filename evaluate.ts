@@ -5,12 +5,12 @@ import * as path from "path";
 import { config } from "dotenv";
 config();
 
-const evalConfig = require('./config.json');
+import evalConfig from "./config.json";
 
 import { GenerationResult, EvalResult } from "./types";
 import { asyncMap } from "./utils";
 
-const runsPath = path.join(__dirname, "runs");
+const runsPath = "./runs"
 
 // Return undefined if the file doesn't exist rather than throwing an error
 const safeRead = async <T>(

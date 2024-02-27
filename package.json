@@ -1,10 +1,11 @@
 {
   "name": "gitwit-data-analyser",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate": "ts-node generate.ts",
-    "evaluate": "ts-node evaluate.ts",
+    "generate": "npx tsx generate.ts",
+    "evaluate": "npx tsx evaluate.ts",
     "view": "nodemon --exec ts-node view.ts --watch views/index.ejs"
   },
   "dependencies": {
@@ -16,8 +17,10 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/ejs": "^3.1.5",
     "@types/node": "^20.10.5",
-    "@types/uuid": "^9.0.7"
+    "@types/uuid": "^9.0.7",
+    "tsx": "^4.7.1"
   }
 }
