@@ -15,10 +15,16 @@ You're welcome to use this framework with your own code generation tool. By defa
 
 ## Getting started
 
-The React evaluation sandbox uses a custom E2B sandbox, which needs to be built before it can be used. This requires E2B's Pro tier. Install the E2B CLI and authenticate:
+This project uses NodeJS. If you don't have it installed, run:
 
 ```bash
-npm install -g @e2b/cli@latest
+yarn global add ts-node
+```
+
+The React evaluation sandbox uses a custom E2B sandbox. To use E2B, install the E2B CLI and authenticate:
+
+```bash
+yarn global add @e2b/cli@latest
 e2b login
 ```
 
@@ -26,13 +32,6 @@ Add your E2B API key to .env:
 
 ```bash
 echo 'E2B_API_KEY=e2b_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' > .env
-```
-
-Build the sandbox:
-
-```bash
-cd sandbox
-e2b build --name "react-evals"
 ```
 
 Once these steps are finished, you can go on to the instructions below.
@@ -70,3 +69,14 @@ Run `yarn view RUN`, to see the results in a visual format. You don't have to wa
 **6. Integrate with your own code generation tool**
 
 Modify `generate.ts` to make this same process work with your own React generation code.
+
+## Modifying the sandbox template
+
+If you make any changes inside the sandbox directory, you need to create a new E2B sandbox as follows:
+
+```bash
+cd sandbox
+e2b build --name "your-sandbox-name"
+```
+
+Then, change react-evals in evaluate.ts to your new sandbox name.
