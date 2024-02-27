@@ -4,7 +4,7 @@
 
 This is a framework for measuring the effectiveness of LLMs and/or AI agents on generating ReactJS code.
 
-You're welcome to use this framework with your own code generation tool. By default it works with [GitWit core](https://github.com/gitwitorg/gitwit-server).
+You're welcome to use this framework with your own code generation tool. By default it works with [GitWit](https://github.com/gitwitorg/gitwit-server).
 
 The main features are:
 - Batch code generation using an LLM or AI agent
@@ -13,7 +13,7 @@ The main features are:
 
 <img src="https://github.com/gitwitorg/react-eval/assets/33395784/63e918f4-034a-4b64-9d7b-1daa750eff2a" width="700" />
 
-## Getting started
+## Installation
 
 To clone the repository and install dependencies, run:
 
@@ -70,7 +70,15 @@ Run `yarn view RUN`, to see the results in a visual format. You don't have to wa
 
 Modify `generate.ts` to make this same process work with your own React generation code.
 
-## Further customization
+## Custom evaluations
+
+### Using your own code generation
+
+To integrate React Eval to your own code generation tool, see where the `generateCode` function is called in [generate.ts](https://github.com/gitwitorg/react-eval/blob/main/generate.ts#L70). Currently this function is used to apply one prompt to one file, and replace the entire file with the reuslts.
+
+### Modifying GitWit Server
+
+React Eval is configured to generate code with GitWit server by default. To modify the server code, first fork and clone [gitwit-server](https://github.com/gitwitorg/gitwit-server) to your computer. In the `gitwit-server` directory, run `yarn link`. Then, in the `react-eval` directory run `yarn install gitwit-server`.
 
 ### Modifying the sandbox template
 
@@ -82,7 +90,3 @@ e2b build --name "your-sandbox-name"
 ```
 
 Then, change react-evals in evaluate.ts to your new sandbox name.
-
-### Modifying GitWit Server
-
-React Eval is configured by default to generate code with GitWit server. To modify the server code, first clone [gitwit-server](https://github.com/gitwitorg/gitwit-server) to your computer. In the `gitwit-server` directory, run `yarn link`. Then, in the `react-eval` directory run `yarn install gitwit-server`.
