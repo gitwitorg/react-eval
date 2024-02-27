@@ -39,6 +39,11 @@ function repeatArray(arr: any[], n: number): any[] {
 // Generate code for each prompt
 async function runGenerations(dataset: string) {
 
+  // Create the runs directory if it doesn't exist
+  if (!fs.existsSync(runsPath)) {
+    fs.mkdirSync(runsPath);
+  }
+  
   // Create new directory for this run
   const maxNumber = fs
     .readdirSync(runsPath)
