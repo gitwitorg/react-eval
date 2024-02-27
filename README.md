@@ -4,43 +4,43 @@
 
 This is a framework for measuring the effectiveness of LLMs and/or AI agents on generating ReactJS code.
 
+You're welcome to use this framework with your own code generation tool. By default it works with [GitWit core](https://github.com/gitwitorg/gitwit-server).
+
 The main features are:
 - Batch code generation using an LLM or AI agent
-- Batch ReactJS compilation and end-to-end testing using cloud sandboxes
+- Batch end-to-end testing of ReactJS apps using E2B cloud sandboxes
 - Quick visualization of evaluation results
-
-You're welcome to use this framework with your own code generation tool. By default it works with [GitWit core](https://github.com/gitwitorg/gitwit-server).
 
 <img src="https://github.com/gitwitorg/react-eval/assets/33395784/63e918f4-034a-4b64-9d7b-1daa750eff2a" width="700" />
 
 ## Getting started
 
-This project uses NodeJS. If you don't have it installed, run:
+To clone the repository and install dependencies, run:
 
 ```bash
-yarn global add ts-node
+git clone https://github.com/gitwitorg/react-eval/
+cd react-eval
+yarn install
 ```
 
-The React evaluation sandbox uses a custom E2B sandbox. To use E2B, install the E2B CLI and authenticate:
+The React evaluation sandbox uses a custom E2B sandbox. To access E2B, install the E2B CLI tool and authenticate:
 
 ```bash
 yarn global add @e2b/cli@latest
 e2b login
 ```
 
-Add your E2B API key to .env:
+Finally, create a .env file with the following:
 
-```bash
-echo 'E2B_API_KEY=e2b_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' > .env
+```txt
+E2B_API_KEY=e2b_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+AZURE_API_KEY=00000000000000000000000000000000
+OPENAI_API_KEY=sk
 ```
 
+Currently, GitWit is set up to generate code using Azure's OpenAI endpoints. However, you must set OPENAI_API_KEY to a dummy value to avoid errors.
+
 Once these steps are finished, you can go on to the instructions below.
-
-## Using with GitWit
-
-If you want to use with GitWit, clone [gitwit-server](https://github.com/gitwitorg/gitwit-server) in another directory. In the `gitwit-server` directory, run `yarn link`. Then, in the `react-eval` directory run `yarn install gitwit-server`.
-
-For GitWit to work, you'll also need to add `AZURE_API_KEY` to your `.env`.
 
 ## Usage
 
@@ -70,7 +70,9 @@ Run `yarn view RUN`, to see the results in a visual format. You don't have to wa
 
 Modify `generate.ts` to make this same process work with your own React generation code.
 
-## Modifying the sandbox template
+## Further customization
+
+### Modifying the sandbox template
 
 If you make any changes inside the sandbox directory, you need to create a new E2B sandbox as follows:
 
@@ -80,3 +82,7 @@ e2b build --name "your-sandbox-name"
 ```
 
 Then, change react-evals in evaluate.ts to your new sandbox name.
+
+### Modifying GitWit Server
+
+React Eval is configured by default to generate code with GitWit server. To modify the server code, first clone [gitwit-server](https://github.com/gitwitorg/gitwit-server) to your computer. In the `gitwit-server` directory, run `yarn link`. Then, in the `react-eval` directory run `yarn install gitwit-server`.
