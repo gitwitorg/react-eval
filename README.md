@@ -1,5 +1,12 @@
 # React Codegen Evaluation
 
+## Table of Contents
+
+- [What is this for?](#what-is-this-for)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Custom evaluations](#custom-evaluations)
+
 ## What is this for?
 
 This is a framework for measuring the effectiveness of LLMs and/or AI agents on generating ReactJS code.
