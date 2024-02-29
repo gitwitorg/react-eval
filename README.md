@@ -37,15 +37,12 @@ yarn global add @e2b/cli@latest
 e2b login
 ```
 
-Finally, create a .env file with the following:
+Finally, copy .env.example or create a .env file with the following:
 
 ```txt
 E2B_API_KEY=e2b_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-AZURE_API_KEY=00000000000000000000000000000000
-OPENAI_API_KEY=sk
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
-
-Currently, GitWit is set up to generate code using Azure's OpenAI endpoints. However, you must set OPENAI_API_KEY to a dummy value to avoid errors.
 
 Once these steps are finished, you can go on to the instructions below.
 
