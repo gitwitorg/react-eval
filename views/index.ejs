@@ -97,14 +97,47 @@
         <tr class="bg-gray-50">
           <td class="border-y px-2 py-2 font-bold">Average LOC:</td>
           <td class="border-y px-2 py-2">
-            <%= Math.round(results.reduce((acc, r) => acc + r.appDotJS.split("\n").length, 0) / results.length) %>
+            <%= Math.round(results.reduce((acc, r)=> acc + r.appDotJS.split("\n").length, 0) / results.length) %>
           </td>
       </tbody>
     </table>
+    <h2 class="text-lg mb-8 text-center mt-12">
+      <strong>
+        Tasks
+      </strong>
+    </h2>
+    <table class="w-128 text-sm mt-8 mx-auto">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="border-y px-2 py-2 font-bold text-left">Task</th>
+          <th class="border-y px-2 py-2 font-bold text-left">Success</th>
+          <th class="border-y px-2 py-2 font-bold text-left">Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% Object.keys(groups).sort().forEach(function(prompt, i) { 
+            const allResults = groups[prompt];
+            const successRate = Math.round(100 * allResults.filter((r) => r.score).length / allResults.length);
+        %>
+          <tr class="bg-gray-50">
+            <td class="border-y px-2 py-2"><%= i + 1 %></td>
+            <td class="border-y px-2 py-2"><%= successRate %>%</td>
+            <td class="border-y px-2 py-2">
+              <a href="#<%= prompt %>" class="underline">
+                <%= prompt %>
+              </a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    
     <% Object.keys(groups).sort().forEach(function(prompt) { const allResults=groups[prompt]; %>
       <h2 class="text-lg mb-8 text-center mt-12">
         <strong>
-          <%= prompt %>
+          <a name="<%= prompt %>">
+            <%= prompt %>
+          </a>
         </strong><br />
         <%= allResults.length %> Results
       </h2>
@@ -148,11 +181,11 @@
                     <%- result.errors.join("<br />") %>
                   </div>
                   <% } %>
-                <% if (result.exitCode !== 0) { %>
-                  <div class="px-2 py-1 inline-block rounded-sm bg-gray-200">
-                    <%- result.log.match(/^\[STDERR\](.*)/mg)?.[0] %>
-                  </div>
-                  <% } %>
+                    <% if (result.exitCode !==0) { %>
+                      <div class="px-2 py-1 inline-block rounded-sm bg-gray-200">
+                        <%- result.log.match(/^\[STDERR\](.*)/mg)?.[0] %>
+                      </div>
+                      <% } %>
               </td>
               <td class="border-y px-2 py-2">
                 <div
