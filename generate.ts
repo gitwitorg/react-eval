@@ -65,6 +65,8 @@ async function runGenerations(dataset: string) {
 
   // Generate code for each prompt
   fs.mkdirSync(newDir, { recursive: true });
+  console.log(`Generated code will be saved in ${newDir}`);
+
   const processedItems: GenerationResult[] = [];
   await asyncMap(items, evalConfig.max_concurrent_generations || 1, async (item : EvalItem) => {
     const { code: newAppDotJS, dependencies } = await generateCode(
@@ -91,6 +93,9 @@ async function runGenerations(dataset: string) {
       `Generated (${processedItems.length}/${items.length}) ${item.prompt}`
     );
   });
+
+  console.log(`Ran ${processedItems.length} generations in ${newDir}`);
+  console.log(`To evaluate, run: yarn evaluate ${newNumber}`);
 
   process.exit(0);
 }
