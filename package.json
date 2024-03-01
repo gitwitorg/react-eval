@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "generate": "npx tsx generate.ts",
     "evaluate": "npx tsx evaluate.ts",
-    "view": "nodemon --exec ts-node view.ts --watch views/index.ejs"
+    "view": "nodemon --exec npx tsx view.ts --watch views/index.ejs"
   },
   "dependencies": {
     "@e2b/sdk": "^0.11.17",
