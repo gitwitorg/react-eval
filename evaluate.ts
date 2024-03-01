@@ -24,6 +24,11 @@ const safeRead = async <T>(
   }
 };
 
+// Sleep for a number of milliseconds
+function sleep(ms : number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function runEvaluations(runNumber: string) {
   // Read the generations file
   const generations: GenerationResult[] = JSON.parse(
@@ -111,6 +116,8 @@ async function runEvaluations(runNumber: string) {
     } finally {
       if (sandbox) {
         await sandbox.close();
+        // Sandboxes do not close immediately: https://github.com/e2b-dev/E2B/issues/283
+        await sleep(16000); // Wait 15s + 1s margin for the sandbox to close.
       }
     }
   });
