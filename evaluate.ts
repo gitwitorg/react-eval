@@ -42,6 +42,7 @@ async function runEvaluations(runNumber: string) {
 
   // Evaluate code for each generation
   const startTime = Date.now();
+  let runningSandboxes = 0;
   let evaluationDurations: number[] = [];
   await asyncMap(generations, evalConfig.max_concurrent_evaluations || 1, async (generation: GenerationResult) => {
 
@@ -56,6 +57,9 @@ async function runEvaluations(runNumber: string) {
       console.error("Error creating sandbox", e);
       throw e;
     }
+
+    runningSandboxes++;
+    console.log(`Started ${generation.id} (${runningSandboxes} evaluations in progress)`)
 
     try {
       const evaluationStartTime = Date.now();
@@ -118,6 +122,7 @@ async function runEvaluations(runNumber: string) {
         await sandbox.close();
         // Sandboxes do not close immediately: https://github.com/e2b-dev/E2B/issues/283
         await sleep(16000); // Wait 15s + 1s margin for the sandbox to close.
+        runningSandboxes--;
       }
     }
   });
