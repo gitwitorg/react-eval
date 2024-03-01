@@ -22,7 +22,7 @@ You can do experiments like:
 
 In short, you can batch run a list of prompts on your agent, then run the resulting code in a ReactJS sandbox, storing all errors and screenshots for later analysis.
 
-<img src="https://github.com/gitwitorg/react-eval/assets/33395784/63e918f4-034a-4b64-9d7b-1daa750eff2a" width="700" />
+<img src="https://github.com/gitwitorg/react-eval/assets/33395784/8790e161-ef51-4e3e-8fee-c523d40b9688" align="center" width="700" />
 
 ## Installation
 
