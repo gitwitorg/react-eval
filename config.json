@@ -2,5 +2,5 @@
     "n_generations": 3,
     "max_concurrent_generations": 10,
     "max_concurrent_evaluations": 20,
-    "sandbox_timeout": 300
+    "sandbox_timeout": 420
 }
