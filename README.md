@@ -34,7 +34,7 @@ The React evaluation sandbox uses a custom E2B sandbox. To access E2B, install t
 
 ```bash
 yarn global add @e2b/cli@latest
-e2b login
+e2b auth login
 ```
 
 Finally, copy .env.example or create a .env file with the following:
