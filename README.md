@@ -1,5 +1,11 @@
 # React Codegen Evaluation
 
+Video walkthrough:
+
+<a href="https://www.youtube.com/watch?v=tMVqY0igi6Q" target="_blank">
+  <img src="https://github.com/gitwitorg/react-eval/assets/33395784/e712d7df-2fb5-469f-bed0-c505026bd8bf" width="400" alt="ReactEval: Evaluating LLM-generated code for ReactJS web apps">
+</a>
+
 ## Table of Contents
 
 - [What is this for?](#what-is-this-for)
