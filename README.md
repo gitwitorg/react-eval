@@ -1,4 +1,4 @@
-# React Codegen Evaluation
+# ReactEval: ReactJS Codegen Evaluation Framework
 
 Video walkthrough:
 
