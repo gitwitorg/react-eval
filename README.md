@@ -113,7 +113,7 @@ If you make any changes inside the sandbox directory, you need to create a new E
 
 ```bash
 cd sandbox
-e2b build --name "your-sandbox-name"
+e2b template build --name "your-sandbox-name"
 ```
 
 Then, change react-evals in evaluate.ts to your new sandbox name.
