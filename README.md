@@ -109,7 +109,7 @@ React Eval is configured to generate code with GitWit server by default. To modi
 
 ### Modifying the sandbox template
 
-If you make any changes inside the sandbox directory, you need to create a new E2B sandbox as follows:
+If you make any changes inside the sandbox directory, you need to create a new E2B sandbox as follows. This requires Docker to be installed and running.
 
 ```bash
 cd sandbox
